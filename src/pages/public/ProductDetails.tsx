@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { KitItem, SiteConfig } from '../../types';
 import { motion } from 'motion/react';
 import { MessageCircle, ChevronLeft, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, cn } from '../../lib/utils';
 
 export function ProductDetails() {
   const { id } = useParams();
