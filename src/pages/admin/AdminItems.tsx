@@ -1,7 +1,5 @@
 import { useState, useMemo } from 'react';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, handleFirestoreError, OperationType } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { useKits } from '../../hooks/useKits';
 import { KitItem, KitItemType } from '../../types';
 import { Plus, Pencil, Trash2, X, Check, Package, Tag, Layers, Search, Copy, Eye, EyeOff, Star, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
@@ -75,7 +73,6 @@ export function AdminItems() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Optional: Validation for image size/type
     if (!file.type.startsWith('image/')) {
       alert('Por favor, selecione um arquivo de imagem.');
       return;
@@ -83,16 +80,32 @@ export function AdminItems() {
 
     setUploading(true);
     try {
-      const fileRef = ref(storage, `kits_e_itens/${Date.now()}_${file.name}`);
-      await uploadBytes(fileRef, file);
-      const url = await getDownloadURL(fileRef);
-      setFormData(prev => ({ ...prev, capa_url: url }));
-    } catch (error) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Upload Error:', uploadError);
+        alert(`Erro do Supabase: ${uploadError.message}`);
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, capa_url: publicUrl }));
+    } catch (error: any) {
       console.error('Error uploading file:', error);
-      alert('Erro ao fazer upload da imagem. Verifique as permissões de armazenamento.');
+      alert('Erro ao fazer upload da imagem: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setUploading(false);
     }
+
   };
 
   const handleOpenForm = (item?: KitItem) => {
@@ -127,16 +140,19 @@ export function AdminItems() {
     try {
       let finalCode = formData.codigo_produto;
       
-      // If new item and no code, generate it
       if (!editingItem && !finalCode) {
         finalCode = generateCode(formData.titulo || '', formData.tipo || 'item_avulso');
       }
 
-      // Check for code uniqueness if changed or new
+      // Check for code uniqueness
       if (!editingItem || finalCode !== editingItem.codigo_produto) {
-        const q = query(collection(db, 'kits_e_itens'), where('codigo_produto', '==', finalCode));
-        const snapshot = await getDocs(q);
-        if (!snapshot.empty) {
+        const { data: existing } = await supabase
+          .from('kits_e_itens')
+          .select('id')
+          .eq('codigo_produto', finalCode)
+          .maybeSingle();
+
+        if (existing) {
           alert('Este código de produto já existe. Por favor, use outro.');
           setSaving(false);
           return;
@@ -146,21 +162,25 @@ export function AdminItems() {
       const payload = {
         ...formData,
         codigo_produto: finalCode,
-        updated_at: serverTimestamp(),
+        updated_at: new Date().toISOString(),
       };
 
       if (editingItem) {
-        const itemDoc = doc(db, 'kits_e_itens', editingItem.id);
-        await updateDoc(itemDoc, payload);
+        const { error } = await supabase
+          .from('kits_e_itens')
+          .update(payload)
+          .eq('id', editingItem.id);
+        if (error) throw error;
       } else {
-        await addDoc(collection(db, 'kits_e_itens'), {
-          ...payload,
-          created_at: serverTimestamp(),
-        });
+        const { error } = await supabase
+          .from('kits_e_itens')
+          .insert([{ ...payload, created_at: new Date().toISOString() }]);
+        if (error) throw error;
       }
       setIsFormOpen(false);
     } catch (error) {
-      handleFirestoreError(error, editingItem ? OperationType.UPDATE : OperationType.CREATE, 'kits_e_itens');
+      console.error('Save error:', error);
+      alert('Erro ao salvar item.');
     } finally {
       setSaving(false);
     }
@@ -168,24 +188,33 @@ export function AdminItems() {
 
   const toggleStatus = async (item: KitItem, field: 'publicado' | 'destaque') => {
     try {
-      const itemDoc = doc(db, 'kits_e_itens', item.id);
-      await updateDoc(itemDoc, {
-        [field]: !item[field],
-        updated_at: serverTimestamp(),
-      });
+      const { error } = await supabase
+        .from('kits_e_itens')
+        .update({
+          [field]: !item[field],
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', item.id);
+      if (error) throw error;
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `kits_e_itens/${item.id}`);
+      console.error('Toggle error:', error);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este item?')) return;
     try {
-      await deleteDoc(doc(db, 'kits_e_itens', id));
+      const { error } = await supabase
+        .from('kits_e_itens')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `kits_e_itens/${id}`);
+      console.error('Delete error:', error);
+      alert('Erro ao excluir item.');
     }
   };
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

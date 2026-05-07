@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { SiteConfig } from '../../types';
 import { Save, Check, Shield, FileText, Globe, User, Phone, MapPin, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -25,12 +24,17 @@ export function AdminConfig() {
   useEffect(() => {
     async function fetchConfig() {
       try {
-        const docSnap = await getDoc(doc(db, 'config_site', 'global'));
-        if (docSnap.exists()) {
-          setFormData(docSnap.data() as SiteConfig);
+        const { data, error } = await supabase
+          .from('site_config')
+          .select('*')
+          .eq('id', 1)
+          .single();
+        
+        if (data) {
+          setFormData(data as SiteConfig);
         }
       } catch (error) {
-        handleFirestoreError(error, OperationType.GET, 'config_site/global');
+        console.error('Error fetching config:', error);
       } finally {
         setLoading(false);
       }
@@ -42,18 +46,26 @@ export function AdminConfig() {
     e.preventDefault();
     setSaving(true);
     try {
-      await setDoc(doc(db, 'config_site', 'global'), {
-        ...formData,
-        updated_at: serverTimestamp(),
-      });
+      const { error } = await supabase
+        .from('site_config')
+        .upsert({
+          id: 1,
+          ...formData,
+          updated_at: new Date().toISOString(),
+        });
+      
+      if (error) throw error;
+      
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'config_site/global');
+      console.error('Save error:', error);
+      alert('Erro ao salvar configurações.');
     } finally {
       setSaving(false);
     }
   };
+
 
   const handleChange = (field: keyof SiteConfig, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

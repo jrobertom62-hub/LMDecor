@@ -3,9 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, limit, orderBy, startAt, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { GoogleGenAI, Type } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
+import { GoogleGenAI } from '@google/genai';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -15,12 +14,10 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Firebase Config
-const firebaseConfigPath = path.join(__dirname, 'firebase-applet-config.json');
-const firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, 'utf-8'));
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Supabase Config
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY; // Use Service Role Key for backend if needed, but Anon Key is fine if RLS allows
+const supabase = createClient(supabaseUrl || '', supabaseKey || '');
 
 async function startServer() {
   const expressApp = express();
@@ -39,18 +36,22 @@ async function startServer() {
     const apiKey = authHeader.split(' ')[1];
     
     try {
-      const q = query(collection(db, 'api_keys'), where('key', '==', apiKey), where('active', '==', true));
-      const snapshot = await getDocs(q);
+      const { data: keyDoc, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .eq('key', apiKey)
+        .eq('active', true)
+        .single();
 
-      if (snapshot.empty) {
+      if (error || !keyDoc) {
         return res.status(401).json({ error: 'Chave de API inválida ou revogada' });
       }
 
       // Update last used
-      const keyDoc = snapshot.docs[0];
-      await updateDoc(doc(db, 'api_keys', keyDoc.id), {
-        last_used: serverTimestamp()
-      });
+      await supabase
+        .from('api_keys')
+        .update({ last_used: new Date().toISOString() })
+        .eq('id', keyDoc.id);
 
       next();
     } catch (error) {
@@ -73,57 +74,51 @@ async function startServer() {
         sort = 'destaque_desc,updated_at_desc'
       } = req.query as any;
 
-      let firestoreQuery: any = collection(db, 'kits_e_itens');
-      const constraints: any[] = [];
+      let query = supabase
+        .from('kits_e_itens')
+        .select('*', { count: 'exact' });
 
-      if (tipo) constraints.push(where('tipo', '==', tipo));
-      if (tema) constraints.push(where('tema', '==', tema));
-      if (codigo) constraints.push(where('codigo_produto', '==', codigo));
-      if (publicado !== undefined) constraints.push(where('publicado', '==', publicado === 'true'));
-      if (destaque !== undefined) constraints.push(where('destaque', '==', destaque === 'true'));
+      if (tipo) query = query.eq('tipo', tipo);
+      if (tema) query = query.eq('tema', tema);
+      if (codigo) query = query.eq('codigo_produto', codigo);
+      if (publicado !== undefined) query = query.eq('publicado', publicado === 'true');
+      if (destaque !== undefined) query = query.eq('destaque', destaque === 'true');
+      if (preco_min) query = query.gte('preco_locacao', Number(preco_min));
+      if (preco_max) query = query.lte('preco_locacao', Number(preco_max));
 
-      // Sort logic (simplified for demonstration, Firestore requires specific indexes)
+      // Array filtering for cores
+      if (cores) {
+        const coresList = cores.split(',').map((c: string) => c.trim());
+        query = query.contains('cores', coresList);
+      }
+
+      // Keyword search
+      if (q) {
+        query = query.or(`titulo.ilike.%${q}%,descricao.ilike.%${q}%`);
+      }
+
+      // Sorting
       const sortParts = (sort as string).split(',');
       sortParts.forEach(part => {
         const [field, order] = part.split('_');
-        constraints.push(orderBy(field, order === 'desc' ? 'desc' : 'asc'));
+        query = query.order(field, { ascending: order !== 'desc' });
       });
 
-      const qry = query(firestoreQuery, ...constraints);
-      const snapshot = await getDocs(qry);
-      
-      let items = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+      // Pagination
+      query = query.range(Number(offsetVal), Number(offsetVal) + Number(limitVal) - 1);
 
-      // Client-side filtering for cores and q (titles/description) as Firestore doesn't support complex substring/array-contains-any easily without indexes or external search
-      if (cores) {
-        const coresList = (cores as string).toLowerCase().split(',').map(c => c.trim());
-        items = items.filter((item: any) => 
-          item.cores?.some((c: string) => coresList.includes(c.toLowerCase()))
-        );
-      }
+      const { data: items, count, error } = await query;
 
-      if (q) {
-        const search = (q as string).toLowerCase();
-        items = items.filter((item: any) => 
-          item.titulo.toLowerCase().includes(search) || 
-          item.descricao?.toLowerCase().includes(search)
-        );
-      }
-
-      if (preco_min) items = items.filter((item: any) => item.preco_locacao >= Number(preco_min));
-      if (preco_max) items = items.filter((item: any) => item.preco_locacao <= Number(preco_max));
-
-      const total = items.length;
-      const paginatedItems = items.slice(Number(offsetVal), Number(offsetVal) + Math.min(Number(limitVal), 20));
+      if (error) throw error;
 
       res.json({
         meta: {
           limit: Number(limitVal),
           offset: Number(offsetVal),
-          total,
+          total: count,
           sort
         },
-        items: paginatedItems
+        items: items || []
       });
     } catch (error) {
       console.error(error);
@@ -134,9 +129,14 @@ async function startServer() {
   // 3.2 Detalhes por ID
       v1.get('/kits-e-itens/:id', async (req: any, res: any) => {
     try {
-      const docSnap = await getDoc(doc(db, 'kits_e_itens', req.params.id));
-      if (!docSnap.exists()) return res.status(404).json({ error: 'Item não encontrado' });
-      res.json({ id: docSnap.id, ...(docSnap.data() as any) });
+      const { data: item, error } = await supabase
+        .from('kits_e_itens')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
+        
+      if (error || !item) return res.status(404).json({ error: 'Item não encontrado' });
+      res.json(item);
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar item' });
     }
@@ -145,11 +145,14 @@ async function startServer() {
   // 3.3 Detalhes por Código
     v1.get('/kits-e-itens/codigo/:codigo', async (req: any, res: any) => {
     try {
-      const q = query(collection(db, 'kits_e_itens'), where('codigo_produto', '==', req.params.codigo));
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) return res.status(404).json({ error: 'Item com este código não encontrado' });
-      const docSnap = snapshot.docs[0];
-      res.json({ id: docSnap.id, ...(docSnap.data() as any) });
+      const { data: item, error } = await supabase
+        .from('kits_e_itens')
+        .select('*')
+        .eq('codigo_produto', req.params.codigo)
+        .single();
+
+      if (error || !item) return res.status(404).json({ error: 'Item com este código não encontrado' });
+      res.json(item);
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar item pelo código' });
     }
@@ -164,8 +167,13 @@ async function startServer() {
 
     try {
       // Get AI Config
-      const configSnap = await getDoc(doc(db, 'ai_config', 'global'));
-      const aiConfig = configSnap.exists() ? configSnap.data() : { 
+      const { data: aiConfigData } = await supabase
+        .from('ai_config')
+        .select('*')
+        .eq('id', 'global')
+        .single();
+
+      const aiConfig = aiConfigData || { 
         provider: 'gemini', 
         model: 'gemini-3.1-pro-preview',
         default_mode: 'enxuto'
@@ -204,16 +212,16 @@ Exemplo de saída:
       let modelUsed = aiConfig.model || (providerUsed === 'gemini' ? 'gemini-3.1-pro-preview' : 'gpt-4o');
 
       if (providerUsed === 'gemini') {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || aiConfig.api_key });
-        const result = await ai.models.generateContent({
-          model: modelUsed,
-          contents: userQuery,
-          config: {
-            systemInstruction: systemPrompt,
+        const ai = new GoogleGenAI(process.env.GEMINI_API_KEY || aiConfig.api_key || '');
+        const model = ai.getGenerativeModel({ model: modelUsed });
+        
+        const result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: userQuery }] }],
+          generationConfig: {
             responseMimeType: 'application/json'
           }
         });
-        const aiResponse = JSON.parse(result.text);
+        const aiResponse = JSON.parse(result.response.text());
         filters = aiResponse.filters;
         interpretacao = aiResponse.interpretacao;
       } else {
@@ -232,40 +240,26 @@ Exemplo de saída:
       }
 
       // Execute Search using extracted filters
-      // Note: We use relative path logic internally
-      const searchParams = new URLSearchParams();
-      if (filters.tipo) searchParams.append('tipo', filters.tipo);
-      if (filters.tema) searchParams.append('tema', filters.tema);
-      if (filters.preco_max) searchParams.append('preco_max', filters.preco_max.toString());
-      if (filters.cores) searchParams.append('cores', filters.cores.join(','));
-      if (filters.q) searchParams.append('q', filters.q);
-      searchParams.append('limit', limitVal.toString());
+      let query = supabase
+        .from('kits_e_itens')
+        .select('*')
+        .eq('publicado', true);
 
-      // Mocking internal call (directly reuse search logic)
-      // This is safer than a loopback fetch
-      // For this step, we'll just repeat the logic or wrap it in a function.
-      // To keep it clean, let's just return a placeholder for now but implement the search soon.
-      
-      // REAL SEARCH LOGIC REUSE:
-      let itemsQry: any = collection(db, 'kits_e_itens');
-      const apiConstraints: any[] = [where('publicado', '==', true)];
-      if (filters.tipo) apiConstraints.push(where('tipo', '==', filters.tipo));
-      if (filters.tema) apiConstraints.push(where('tema', '==', filters.tema));
-      const snapshot = await getDocs(query(itemsQry, ...apiConstraints));
-      let items = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
-
-      if (filters.q) {
-        const s = filters.q.toLowerCase();
-        items = items.filter((item: any) => item.titulo.toLowerCase().includes(s) || item.descricao?.toLowerCase().includes(s));
-      }
-      if (filters.preco_max) items = items.filter((item: any) => item.preco_locacao <= filters.preco_max);
+      if (filters.tipo) query = query.eq('tipo', filters.tipo);
+      if (filters.tema) query = query.eq('tema', filters.tema);
+      if (filters.preco_max) query = query.lte('preco_locacao', filters.preco_max);
       if (filters.cores && Array.isArray(filters.cores)) {
-        const cLow = filters.cores.map(c => c.toLowerCase());
-        items = items.filter((item: any) => item.cores?.some((c: string) => cLow.includes(c.toLowerCase())));
+        query = query.contains('cores', filters.cores);
+      }
+      if (filters.q) {
+        query = query.or(`titulo.ilike.%${filters.q}%,descricao.ilike.%${filters.q}%`);
       }
 
+      const { data: itemsResult, error: searchError } = await query.limit(Number(limitVal));
+      if (searchError) throw searchError;
+
+      let items = itemsResult || [];
       const total = items.length;
-      items = items.slice(0, Math.min(Number(limitVal), 20));
 
       if (modo === 'enxuto') {
         items = items.map((i: any) => ({
@@ -280,9 +274,8 @@ Exemplo de saída:
       const duration = Date.now() - startTime;
 
       // LOG the request
-      await addDoc(collection(db, 'ai_search_logs'), {
+      await supabase.from('ai_search_logs').insert({
         query: userQuery,
-        timestamp: serverTimestamp(),
         provider: providerUsed,
         model: modelUsed,
         filters: filters,

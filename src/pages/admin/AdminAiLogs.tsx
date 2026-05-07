@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { Activity, Search, Calendar, ChevronRight, Clock, Database, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
@@ -8,7 +7,7 @@ import { cn } from '../../lib/utils';
 interface AiLog {
   id: string;
   query: string;
-  timestamp: any;
+  timestamp: string;
   provider: string;
   model: string;
   filters: any;
@@ -23,13 +22,33 @@ export function AdminAiLogs() {
   const [selectedLog, setSelectedLog] = useState<AiLog | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'ai_search_logs'), orderBy('timestamp', 'desc'), limit(50));
-    const unsub = onSnapshot(q, (snapshot) => {
-      setLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AiLog)));
+    async function fetchLogs() {
+      const { data, error } = await supabase
+        .from('ai_search_logs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(50);
+      
+      if (data) setLogs(data as AiLog[]);
       setLoading(false);
-    });
-    return unsub;
+    }
+
+    fetchLogs();
+
+    const channel = supabase
+      .channel('ai-logs-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ai_search_logs' },
+        () => fetchLogs()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   return (
     <div className="space-y-12">
@@ -57,7 +76,7 @@ export function AdminAiLogs() {
                   <div className="space-y-1 overflow-hidden">
                     <p className="text-sm font-medium text-editorial-ink truncate">"{log.query}"</p>
                     <div className="flex items-center gap-3 text-[10px] text-editorial-muted uppercase font-bold tracking-wider">
-                      <span className="flex items-center gap-1"><Calendar size={12} /> {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString('pt-BR') : '-'}</span>
+                      <span className="flex items-center gap-1"><Calendar size={12} /> {log.timestamp ? new Date(log.timestamp).toLocaleString('pt-BR') : '-'}</span>
                       <span className="flex items-center gap-1"><Database size={12} /> {log.result_count} resultados</span>
                     </div>
                   </div>

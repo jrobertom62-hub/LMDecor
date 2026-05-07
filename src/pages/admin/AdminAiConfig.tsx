@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { Cpu, Save, ShieldCheck, AlertTriangle, Settings, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -25,12 +24,17 @@ export function AdminAiConfig() {
   useEffect(() => {
     async function fetchConfig() {
       try {
-        const docSnap = await getDoc(doc(db, 'ai_config', 'global'));
-        if (docSnap.exists()) {
-          setConfig(docSnap.data() as AiConfig);
+        const { data, error } = await supabase
+          .from('ai_config')
+          .select('*')
+          .eq('id', 'global')
+          .single();
+        
+        if (data) {
+          setConfig(data as AiConfig);
         }
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching AI config:', error);
       } finally {
         setLoading(false);
       }
@@ -43,18 +47,26 @@ export function AdminAiConfig() {
     setSaving(true);
     setSuccess(false);
     try {
-      await setDoc(doc(db, 'ai_config', 'global'), {
-        ...config,
-        updated_at: serverTimestamp()
-      });
+      const { error } = await supabase
+        .from('ai_config')
+        .upsert({
+          id: 'global',
+          ...config,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (error) throw error;
+      
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'ai_config/global');
+      console.error('Save error:', error);
+      alert('Erro ao salvar configuração de IA.');
     } finally {
       setSaving(false);
     }
   };
+
 
   if (loading) return null;
 

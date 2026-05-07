@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { Key, Plus, Trash2, Copy, Check, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,8 +10,8 @@ interface ApiKey {
   key: string;
   name: string;
   active: boolean;
-  created_at: any;
-  last_used: any;
+  created_at: string;
+  last_used: string | null;
 }
 
 export function AdminApiKeys() {
@@ -25,12 +24,30 @@ export function AdminApiKeys() {
   const [showKeyId, setShowKeyId] = useState<string | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'api_keys'), orderBy('created_at', 'desc'));
-    const unsub = onSnapshot(q, (snapshot) => {
-      setKeys(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ApiKey)));
+    async function fetchKeys() {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (data) setKeys(data as ApiKey[]);
       setLoading(false);
-    });
-    return unsub;
+    }
+
+    fetchKeys();
+
+    const channel = supabase
+      .channel('api-keys-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'api_keys' },
+        () => fetchKeys()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const generateNewKey = async (e: React.FormEvent) => {
@@ -39,28 +56,35 @@ export function AdminApiKeys() {
 
     const key = `pk_${uuidv4().replace(/-/g, '')}`;
     try {
-      await addDoc(collection(db, 'api_keys'), {
-        key,
-        name: newKeyName,
-        active: true,
-        created_at: serverTimestamp(),
-        last_used: null
-      });
+      const { error } = await supabase
+        .from('api_keys')
+        .insert([{
+          key,
+          name: newKeyName,
+          active: true,
+          created_at: new Date().toISOString()
+        }]);
+      
+      if (error) throw error;
       setNewKeyGenerated(key);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'api_keys');
+      console.error('Error generating key:', error);
+      alert('Erro ao gerar chave de API.');
     }
   };
 
   const toggleKeyStatus = async (id: string, currentStatus: boolean) => {
     try {
-      await updateDoc(doc(db, 'api_keys', id), {
-        active: !currentStatus
-      });
+      const { error } = await supabase
+        .from('api_keys')
+        .update({ active: !currentStatus })
+        .eq('id', id);
+      if (error) throw error;
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `api_keys/${id}`);
+      console.error('Error toggling key:', error);
     }
   };
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -131,7 +155,7 @@ export function AdminApiKeys() {
                   </span>
                 </td>
                 <td className="px-6 py-6 text-[11px] text-editorial-muted">
-                  {key.created_at ? new Date(key.created_at.seconds * 1000).toLocaleDateString('pt-BR') : '-'}
+                  {key.created_at ? new Date(key.created_at).toLocaleDateString('pt-BR') : '-'}
                 </td>
                 <td className="px-10 py-6 text-right">
                   <button 
