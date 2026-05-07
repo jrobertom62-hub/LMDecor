@@ -43,6 +43,14 @@ export function ProductDetails() {
     fetchProduct();
   }, [id]);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -54,7 +62,7 @@ export function ProductDetails() {
   if (error || !product) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-32 text-center md:px-8">
-        <AlertCircle className="mx-auto mb-6 h-16 w-16 text-editorial-muted/30" />
+        <AlertCircle className="mx-auto mb-6 h-12 w-12 text-editorial-muted/30" />
         <h2 className="font-serif text-3xl text-editorial-ink italic">Produto indisponível</h2>
         <p className="mt-4 text-editorial-muted">Este item não está mais disponível no catálogo ou o link está incorreto.</p>
         <Link to="/" className="mt-12 inline-block border border-editorial-ink px-10 py-4 text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink transition-all hover:bg-editorial-ink hover:text-white">
@@ -71,12 +79,12 @@ export function ProductDetails() {
     : '#';
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:py-24">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:py-24">
       <button 
-        onClick={() => navigate(-1)} 
-        className="mb-12 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted transition-colors hover:text-editorial-ink"
+        onClick={handleBack} 
+        className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted transition-colors hover:text-editorial-ink"
       >
-        <ChevronLeft size={16} /> Voltar
+        <ChevronLeft size={14} /> Voltar
       </button>
 
       <div className="grid gap-16 lg:grid-cols-2">

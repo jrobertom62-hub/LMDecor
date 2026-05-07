@@ -34,72 +34,76 @@ export function HomePage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-24 md:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 md:py-24 md:px-8">
       {/* Hero / Intro */}
-      <div className="mb-24 text-center">
+      <div className="mb-12 md:mb-24 text-center">
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-serif text-5xl font-light tracking-tight text-editorial-ink md:text-7xl"
+          className="font-serif text-3xl md:text-5xl lg:text-7xl font-light tracking-tight text-editorial-ink"
         >
           Alugue e decore seu momento.
         </motion.h1>
-        <div className="mx-auto mt-8 h-px w-24 bg-editorial-accent"></div>
+        <div className="mx-auto mt-6 md:mt-8 h-px w-16 md:w-24 bg-editorial-accent"></div>
       </div>
 
       {/* Filters & Search */}
-      <div className="mb-16 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-wrap gap-6 md:items-end">
+      <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="grid grid-cols-1 md:flex md:flex-wrap gap-4 md:gap-6 md:items-end">
           {/* Search */}
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-editorial-muted" />
+            <Search className="absolute left-4 top-1/2 h-3 w-3 -translate-y-1/2 text-editorial-muted" />
             <input 
               type="text" 
               placeholder="BUSCAR NO CATÁLOGO..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border-b border-editorial-border bg-transparent py-4 pl-10 pr-4 text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+              className="w-full border-b border-editorial-border bg-transparent py-3 md:py-4 pl-9 pr-4 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
             />
           </div>
 
-          {/* Type Filter */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted ml-1">Coleção</span>
-            <select 
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as any)}
-              className="min-w-[180px] cursor-pointer border-b border-editorial-border bg-transparent py-4 px-4 text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
-            >
-              <option value="all">TODAS AS COLEÇÕES</option>
-              <option value="kit_completo">KITS COMPLETOS</option>
-              <option value="item_avulso">ITENS AVULSOS</option>
-              <option value="painel">PAINÉIS</option>
-              <option value="mesa">MESAS</option>
-              <option value="baloes">BALÕES</option>
-              <option value="outros">OUTROS</option>
-            </select>
-          </div>
+          {/* Filters Group */}
+          <div className="grid grid-cols-2 gap-4 md:flex md:gap-6">
+            {/* Type Filter */}
+            <div className="flex flex-col gap-1 md:gap-2">
+              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-editorial-muted ml-1">Coleção</span>
+              <select 
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value as any)}
+                className="cursor-pointer border-b border-editorial-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+              >
+                <option value="all">TODAS</option>
+                <option value="kit_completo">KITS</option>
+                <option value="item_avulso">AVULSOS</option>
+                <option value="painel">PAINÉIS</option>
+                <option value="mesa">MESAS</option>
+                <option value="baloes">BALÕES</option>
+                <option value="outros">OUTROS</option>
+              </select>
+            </div>
 
-          {/* Theme Filter */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted ml-1">Tema</span>
-            <select 
-              value={selectedTheme}
-              onChange={(e) => setSelectedTheme(e.target.value)}
-              className="min-w-[180px] cursor-pointer border-b border-editorial-border bg-transparent py-4 px-4 text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
-            >
-              <option value="all">TODOS OS TEMAS</option>
-              {themes.filter(t => t !== 'all').map(theme => (
-                <option key={theme} value={theme}>{theme.toUpperCase()}</option>
-              ))}
-            </select>
+            {/* Theme Filter */}
+            <div className="flex flex-col gap-1 md:gap-2">
+              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-editorial-muted ml-1">Tema</span>
+              <select 
+                value={selectedTheme}
+                onChange={(e) => setSelectedTheme(e.target.value)}
+                className="cursor-pointer border-b border-editorial-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+              >
+                <option value="all">TODOS</option>
+                {themes.filter(t => t !== 'all').map(theme => (
+                  <option key={theme} value={theme}>{theme.toUpperCase()}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        <div className="text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted">
+        <div className="text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted border-t md:border-none pt-4 md:pt-0">
           <span className="text-editorial-ink">{filteredKits.length}</span> Peças Disponíveis
         </div>
       </div>
+
 
       {/* Grid */}
       {filteredKits.length > 0 ? (
