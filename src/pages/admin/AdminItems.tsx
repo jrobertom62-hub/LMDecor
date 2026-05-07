@@ -70,6 +70,17 @@ export function AdminItems() {
     return `${prefix}-${cleanTitle || 'PROD'}-${random}`;
   };
 
+  const deleteFromStorage = async (url: string) => {
+    try {
+      const path = url.split('/storage/v1/object/public/images/')[1];
+      if (path) {
+        await supabase.storage.from('images').remove([path]);
+      }
+    } catch (error) {
+      console.error('Error deleting file from storage:', error);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -81,6 +92,11 @@ export function AdminItems() {
 
     setUploading(true);
     try {
+      // Deletar imagem antiga se existir
+      if (formData.capa_url) {
+        await deleteFromStorage(formData.capa_url);
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `products/${fileName}`;
@@ -144,7 +160,12 @@ export function AdminItems() {
     }
   };
 
-  const removeGalleryImage = (index: number) => {
+  const removeGalleryImage = async (index: number) => {
+    const urlToRemove = formData.fotos?.[index];
+    if (urlToRemove) {
+      await deleteFromStorage(urlToRemove);
+    }
+    
     setFormData(prev => ({
       ...prev,
       fotos: (prev.fotos || []).filter((_, i) => i !== index)
@@ -509,7 +530,33 @@ export function AdminItems() {
                       <div className="space-y-6">
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Foto de Capa (Principal)</label>
-                          <div className="relative group">
+                          <div 
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const index = e.dataTransfer.getData('galleryIndex');
+                              if (index !== '') {
+                                const idx = parseInt(index);
+                                const galleryImg = formData.fotos?.[idx];
+                                const currentCapa = formData.capa_url;
+                                
+                                if (galleryImg) {
+                                  const newGallery = [...(formData.fotos || [])];
+                                  if (currentCapa) {
+                                    newGallery[idx] = currentCapa;
+                                  } else {
+                                    newGallery.splice(idx, 1);
+                                  }
+                                  setFormData(prev => ({ 
+                                    ...prev, 
+                                    capa_url: galleryImg,
+                                    fotos: newGallery
+                                  }));
+                                }
+                              }
+                            }}
+                            className="relative group"
+                          >
                             <input 
                               type="file" 
                               accept="image/*"
@@ -531,6 +578,9 @@ export function AdminItems() {
                               )}
                               {uploading && <Loader2 className="absolute animate-spin text-editorial-accent" size={24} />}
                             </div>
+                            <div className="absolute inset-x-0 bottom-0 bg-editorial-ink/60 p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              <p className="text-[8px] text-white text-center font-bold uppercase tracking-[1px]">Solte uma imagem aqui para trocar</p>
+                            </div>
                           </div>
                         </div>
                         <input 
@@ -545,15 +595,22 @@ export function AdminItems() {
                       {/* Galeria */}
                       <div className="space-y-6">
                         <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Fotos (Adicionais)</label>
+                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Fotos (Arraste para a capa)</label>
                           <div className="grid grid-cols-3 gap-2">
                             {formData.fotos?.map((url, idx) => (
-                              <div key={idx} className="relative aspect-square border border-editorial-border group">
+                              <div 
+                                key={idx} 
+                                draggable
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData('galleryIndex', idx.toString());
+                                }}
+                                className="relative aspect-square border border-editorial-border group cursor-move hover:ring-2 hover:ring-editorial-accent transition-all"
+                              >
                                 <img src={url} className="h-full w-full object-cover" alt={`Gallery ${idx}`} />
                                 <button 
                                   type="button"
                                   onClick={() => removeGalleryImage(idx)}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                                 >
                                   <X size={10} />
                                 </button>
