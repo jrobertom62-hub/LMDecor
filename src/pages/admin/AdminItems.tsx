@@ -134,7 +134,15 @@ export function AdminItems() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.titulo || !formData.preco_locacao) return;
+    
+    if (!formData.titulo) {
+      alert('O título é obrigatório!');
+      return;
+    }
+    if (!formData.preco_locacao && formData.preco_locacao !== 0) {
+      alert('O preço de locação é obrigatório!');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -146,11 +154,13 @@ export function AdminItems() {
 
       // Check for code uniqueness
       if (!editingItem || finalCode !== editingItem.codigo_produto) {
-        const { data: existing } = await supabase
+        const { data: existing, error: checkError } = await supabase
           .from('kits_e_itens')
           .select('id')
           .eq('codigo_produto', finalCode)
           .maybeSingle();
+
+        if (checkError) throw checkError;
 
         if (existing) {
           alert('Este código de produto já existe. Por favor, use outro.');
@@ -178,13 +188,15 @@ export function AdminItems() {
         if (error) throw error;
       }
       setIsFormOpen(false);
-    } catch (error) {
+      alert('Item salvo com sucesso!');
+    } catch (error: any) {
       console.error('Save error:', error);
-      alert('Erro ao salvar item.');
+      alert('Erro ao salvar no banco de dados: ' + (error.message || 'Verifique as permissões de RLS no Supabase'));
     } finally {
       setSaving(false);
     }
   };
+
 
   const toggleStatus = async (item: KitItem, field: 'publicado' | 'destaque') => {
     try {
