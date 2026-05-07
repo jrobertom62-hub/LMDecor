@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { KitItem, SiteConfig } from '../../types';
 import { motion } from 'motion/react';
 import { MessageCircle, ChevronLeft, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -20,21 +19,21 @@ export function ProductDetails() {
     async function fetchProduct() {
       if (!id) return;
       try {
-        const docRef = doc(db, 'kits_e_itens', id);
-        const docSnap = await getDoc(docRef);
+        const { data, error } = await supabase
+          .from('kits_e_itens')
+          .select('*')
+          .eq('id', id)
+          .single();
         
-        if (docSnap.exists()) {
-          const data = docSnap.data() as KitItem;
-          if (data.publicado) {
-            setProduct({ id: docSnap.id, ...data });
-          } else {
-            setError(true);
-          }
+        if (error) throw error;
+        
+        if (data && data.publicado) {
+          setProduct(data as KitItem);
         } else {
           setError(true);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching product details:', err);
         setError(true);
       } finally {
         setLoading(false);
@@ -42,6 +41,7 @@ export function ProductDetails() {
     }
     fetchProduct();
   }, [id]);
+
 
   if (loading) {
     return (
