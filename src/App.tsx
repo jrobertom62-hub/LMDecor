@@ -9,8 +9,10 @@ import { AdminApiKeys } from './pages/admin/AdminApiKeys';
 import { AdminAiConfig } from './pages/admin/AdminAiConfig';
 import { AdminAiLogs } from './pages/admin/AdminAiLogs';
 import { AdminApiDocs } from './pages/admin/AdminApiDocs';
+import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { PublicLayout } from './pages/public/PublicLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export default function App() {
   return (
@@ -25,17 +27,23 @@ export default function App() {
           <Route path="/politica-de-cookies" element={<LegalPage type="cookies" />} />
         </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="config" element={<AdminConfig />} />
-          <Route path="items" element={<AdminItems />} />
-          <Route path="api-keys" element={<AdminApiKeys />} />
-          <Route path="ai-config" element={<AdminAiConfig />} />
-          <Route path="ai-logs" element={<AdminAiLogs />} />
-          <Route path="api-docs" element={<AdminApiDocs />} />
+        {/* Admin Auth */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* Protected Admin Routes */}
+        <Route path="/admin" element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="config" element={<AdminConfig />} />
+            <Route path="items" element={<AdminItems />} />
+            <Route path="api-keys" element={<AdminApiKeys />} />
+            <Route path="ai-config" element={<AdminAiConfig />} />
+            <Route path="ai-logs" element={<AdminAiLogs />} />
+            <Route path="api-docs" element={<AdminApiDocs />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
   );
 }
+

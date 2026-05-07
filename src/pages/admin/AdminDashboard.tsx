@@ -98,7 +98,7 @@ export function AdminDashboard() {
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-[2px] text-editorial-muted">Última Atualização</p>
                 <p className="text-sm font-medium text-editorial-ink">
-                  {config?.updated_at ? new Date(config.updated_at.seconds * 1000).toLocaleDateString('pt-BR') : 'N/A'}
+                  {config?.updated_at ? new Date(config.updated_at).toLocaleDateString('pt-BR') : 'N/A'}
                 </p>
               </div>
             </div>

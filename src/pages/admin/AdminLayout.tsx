@@ -1,11 +1,18 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, Package, ExternalLink, Menu, X, Key, Cpu, Activity, FileJson } from 'lucide-react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Settings, Package, ExternalLink, Menu, X, Key, Cpu, Activity, FileJson, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import { cn } from '../../lib/utils';
 
 export function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/admin/login');
+  };
 
   const menuItems = [
     { label: 'Visão Geral', icon: LayoutDashboard, path: '/admin' },
@@ -60,15 +67,23 @@ export function AdminLayout() {
             })}
           </nav>
 
-          <div className="mt-auto pt-8 border-t border-editorial-border">
+          <div className="mt-auto space-y-4 pt-8 border-t border-editorial-border">
             <Link 
               to="/" 
               target="_blank"
-              className="flex items-center justify-between bg-editorial-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-white transition-opacity hover:opacity-90"
+              className="flex items-center justify-between border border-editorial-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-editorial-ink transition-all hover:bg-editorial-ink hover:text-white"
             >
               <span>Ver Site Público</span>
               <ExternalLink size={14} />
             </Link>
+
+            <button 
+              onClick={handleLogout}
+              className="flex w-full items-center justify-between bg-editorial-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-white transition-opacity hover:opacity-90"
+            >
+              <span>Sair do Sistema</span>
+              <LogOut size={14} />
+            </button>
           </div>
         </div>
       </aside>
