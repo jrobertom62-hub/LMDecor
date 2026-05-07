@@ -10,10 +10,10 @@ export function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { config } = useOutletContext<{ config: SiteConfig }>();
-  
   const [product, setProduct] = useState<KitItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -29,6 +29,7 @@ export function ProductDetails() {
         
         if (data && data.publicado) {
           setProduct(data as KitItem);
+          setActiveImage(data.capa_url);
         } else {
           setError(true);
         }
@@ -41,7 +42,6 @@ export function ProductDetails() {
     }
     fetchProduct();
   }, [id]);
-
 
   if (loading) {
     return (
@@ -64,6 +64,7 @@ export function ProductDetails() {
     );
   }
 
+  const allImages = [product.capa_url, ...(product.fotos || [])].filter(Boolean);
   const whatsappMessage = `Olá! Tenho interesse no kit/item código ${product.codigo_produto}. Pode me passar mais informações? (Item: ${product.titulo})`;
   const whatsappUrl = config?.whatsapp 
     ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
@@ -87,13 +88,29 @@ export function ProductDetails() {
         >
           <div className="aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border">
             <img 
-              src={product.capa_url || 'https://placehold.co/800x1000?text=Sem+Foto'} 
+              src={activeImage || 'https://placehold.co/800x1000?text=Sem+Foto'} 
               alt={product.titulo}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-all duration-500"
               referrerPolicy="no-referrer"
             />
           </div>
-          {/* Gallery placeholder if needed later */}
+          
+          {allImages.length > 1 && (
+            <div className="grid grid-cols-5 gap-4">
+              {allImages.map((img, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => setActiveImage(img)}
+                  className={cn(
+                    "aspect-square border transition-all overflow-hidden",
+                    activeImage === img ? "border-editorial-ink scale-95" : "border-editorial-border hover:border-editorial-accent"
+                  )}
+                >
+                  <img src={img} className="h-full w-full object-cover" alt={`Thumb ${idx}`} />
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Info */}

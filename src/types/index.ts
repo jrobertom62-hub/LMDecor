@@ -13,6 +13,7 @@ export interface KitItem {
   itens_inclusos: string;
   imagens: string[];
   capa_url: string;
+  fotos?: string[];
   url_publica: string;
   destaque: boolean;
   publicado: boolean;

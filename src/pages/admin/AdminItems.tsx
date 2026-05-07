@@ -53,6 +53,7 @@ export function AdminItems() {
     dimensoes: '',
     itens_inclusos: '',
     capa_url: '',
+    fotos: [],
     publicado: true,
     destaque: false,
   });
@@ -84,15 +85,11 @@ export function AdminItems() {
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(filePath, file);
 
-      if (uploadError) {
-        console.error('Upload Error:', uploadError);
-        alert(`Erro do Supabase: ${uploadError.message}`);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('images')
@@ -101,17 +98,66 @@ export function AdminItems() {
       setFormData(prev => ({ ...prev, capa_url: publicUrl }));
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      alert('Erro ao fazer upload da imagem: ' + (error.message || 'Erro desconhecido'));
+      alert('Erro ao fazer upload da imagem: ' + error.message);
     } finally {
       setUploading(false);
     }
+  };
 
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const newUrls: string[] = [];
+      
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `products/gallery/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('images')
+          .getPublicUrl(filePath);
+
+        newUrls.push(publicUrl);
+      }
+
+      setFormData(prev => ({ 
+        ...prev, 
+        fotos: [...(prev.fotos || []), ...newUrls] 
+      }));
+    } catch (error: any) {
+      console.error('Gallery upload error:', error);
+      alert('Erro ao subir galeria: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      fotos: (prev.fotos || []).filter((_, i) => i !== index)
+    }));
   };
 
   const handleOpenForm = (item?: KitItem) => {
     if (item) {
       setEditingItem(item);
-      setFormData(item);
+      setFormData({
+        ...item,
+        fotos: item.fotos || []
+      });
     } else {
       setEditingItem(null);
       setFormData({
@@ -125,12 +171,14 @@ export function AdminItems() {
         dimensoes: '',
         itens_inclusos: '',
         capa_url: '',
+        fotos: [],
         publicado: true,
         destaque: false,
       });
     }
     setIsFormOpen(true);
   };
+/* ... handleSave update ... */
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -456,65 +504,74 @@ export function AdminItems() {
                       <h4 className="text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink">Mídia e Imagens</h4>
                     </div>
                     
-                    <div className="grid gap-8 md:grid-cols-2">
-                      <div className="space-y-4">
+                    <div className="grid gap-12 md:grid-cols-2">
+                      {/* Capa Principal */}
+                      <div className="space-y-6">
                         <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Upload de Capa</label>
-                          <div className="relative">
+                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Foto de Capa (Principal)</label>
+                          <div className="relative group">
                             <input 
                               type="file" 
                               accept="image/*"
                               onChange={handleFileUpload}
-                              className="absolute inset-0 cursor-pointer opacity-0"
+                              className="absolute inset-0 z-10 cursor-pointer opacity-0"
                               disabled={uploading}
                             />
                             <div className={cn(
-                              "flex items-center gap-3 border border-dashed border-editorial-border bg-white px-4 py-8 text-center transition-colors",
-                              uploading ? "opacity-50" : "hover:bg-neutral-50"
+                              "flex flex-col items-center justify-center border-2 border-dashed border-editorial-border bg-white aspect-video transition-all group-hover:border-editorial-accent",
+                              uploading && "opacity-50"
                             )}>
-                              <div className="mx-auto flex flex-col items-center gap-2">
-                                {uploading ? (
-                                  <Loader2 size={24} className="animate-spin text-editorial-accent" />
-                                ) : (
-                                  <Upload size={24} className="text-editorial-muted" />
-                                )}
-                                <span className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">
-                                  {uploading ? 'Enviando...' : 'Clique ou arraste para subir'}
-                                </span>
-                              </div>
+                              {formData.capa_url ? (
+                                <img src={formData.capa_url} className="h-full w-full object-cover" alt="Capa" />
+                              ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                  <Upload className="text-editorial-muted" size={24} />
+                                  <span className="text-[9px] font-bold uppercase tracking-[1px] text-editorial-muted">Subir Capa</span>
+                                </div>
+                              )}
+                              {uploading && <Loader2 className="absolute animate-spin text-editorial-accent" size={24} />}
                             </div>
                           </div>
                         </div>
-
-                        <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">OU URL da Imagem</label>
-                          <input 
-                            type="text" 
-                            value={formData.capa_url}
-                            onChange={(e) => setFormData({...formData, capa_url: e.target.value})}
-                            className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none focus:border-editorial-accent"
-                            placeholder="https://..."
-                          />
-                        </div>
+                        <input 
+                          type="text" 
+                          value={formData.capa_url}
+                          onChange={(e) => setFormData({...formData, capa_url: e.target.value})}
+                          className="w-full border border-editorial-border bg-white px-4 py-3 text-xs outline-none focus:border-editorial-accent"
+                          placeholder="URL da imagem de capa"
+                        />
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                         <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Pré-visualização</label>
-                         <div className="aspect-square w-full border border-editorial-border bg-editorial-bg-admin flex items-center justify-center overflow-hidden">
-                            {formData.capa_url ? (
-                              <img 
-                                src={formData.capa_url} 
-                                alt="Pre-visualização" 
-                                className="h-full w-full object-cover"
-                                referrerPolicy="no-referrer"
-                              />
-                            ) : (
-                              <div className="flex flex-col items-center gap-2 text-editorial-muted/30">
-                                <Package size={40} />
-                                <span className="text-[9px] font-bold uppercase">Sem imagem</span>
+                      {/* Galeria */}
+                      <div className="space-y-6">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Fotos (Adicionais)</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {formData.fotos?.map((url, idx) => (
+                              <div key={idx} className="relative aspect-square border border-editorial-border group">
+                                <img src={url} className="h-full w-full object-cover" alt={`Gallery ${idx}`} />
+                                <button 
+                                  type="button"
+                                  onClick={() => removeGalleryImage(idx)}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={10} />
+                                </button>
                               </div>
-                            )}
-                         </div>
+                            ))}
+                            <div className="relative aspect-square border-2 border-dashed border-editorial-border flex items-center justify-center hover:border-editorial-accent transition-colors">
+                              <input 
+                                type="file" 
+                                multiple
+                                accept="image/*"
+                                onChange={handleGalleryUpload}
+                                className="absolute inset-0 cursor-pointer opacity-0"
+                                disabled={uploading}
+                              />
+                              <Plus size={20} className="text-editorial-muted" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
