@@ -34,7 +34,44 @@ export function HomePage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 md:py-24 md:px-8">
+    <div className="min-h-screen bg-celebration-cream/30">
+      {/* Hero Section */}
+      <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/hero-banner.png" 
+            alt="Festa Premium" 
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-celebration-ink/60 to-transparent" />
+        </div>
+        
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-4 md:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl"
+          >
+            <span className="mb-4 inline-block text-[10px] font-bold uppercase tracking-[4px] text-celebration-pink bg-white/90 px-4 py-1.5 rounded-full shadow-sm">
+              LM Decor Celebrações
+            </span>
+            <h1 className="mb-6 font-serif text-4xl leading-tight text-white md:text-6xl lg:text-7xl italic">
+              Transformamos sonhos em <span className="text-celebration-pink">cenários mágicos</span>.
+            </h1>
+            <p className="mb-10 text-lg text-white/90 font-light leading-relaxed max-w-lg">
+              Curadoria exclusiva de kits e itens para festas que tornam cada celebração um evento memorável e sofisticado.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a href="#catalogo" className="bg-celebration-pink px-10 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:scale-105 shadow-xl shadow-celebration-pink/20">
+                Explorar Catálogo
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <div id="catalogo" className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:py-24">
       {/* Hero / Intro */}
       <div className="mb-12 md:mb-24 text-center">
         <motion.h1 

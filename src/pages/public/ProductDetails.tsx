@@ -88,7 +88,8 @@ export function ProductDetails() {
     : '#';
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:py-24">
+    <div className="min-h-screen bg-celebration-cream/30">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:py-24">
       <button 
         onClick={handleBack} 
         className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted transition-colors hover:text-editorial-ink"

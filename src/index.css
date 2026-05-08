@@ -1,17 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-cormorant: "Cormorant Garamond", serif;
   
-  --color-editorial-cream: #FDFCFB;
-  --color-editorial-ink: #1A1A1A;
-  --color-editorial-accent: #C5A059;
-  --color-editorial-muted: #717171;
-  --color-editorial-border: #E5E5E5;
-  --color-editorial-bg-admin: #F4F4F4;
+  --color-celebration-pink: #FF85B2;
+  --color-celebration-purple: #9D8DF1;
+  --color-celebration-gold: #D4AF37;
+  --color-celebration-cream: #FFFBF0;
+  --color-celebration-ink: #2D2D2D;
+  --color-celebration-muted: #8E8E8E;
+  --color-celebration-border: #F0E6D2;
+  --color-celebration-bg-admin: #F9F7F2;
+
+  /* Legacy aliases to avoid breaking things immediately */
+  --color-editorial-cream: var(--color-celebration-cream);
+  --color-editorial-ink: var(--color-celebration-ink);
+  --color-editorial-accent: var(--color-celebration-pink);
+  --color-editorial-muted: var(--color-celebration-muted);
+  --color-editorial-border: var(--color-celebration-border);
+  --color-editorial-bg-admin: var(--color-celebration-bg-admin);
 }
 
 @layer base {

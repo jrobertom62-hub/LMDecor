@@ -8,7 +8,7 @@ interface NavbarProps {
 
 export function Navbar({ config }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-editorial-border bg-editorial-cream/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-celebration-border bg-gradient-to-r from-celebration-cream via-white to-celebration-cream/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:py-6 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           {(config?.logo_url || '/logolmdecor.png') ? (
