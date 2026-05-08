@@ -81,72 +81,69 @@ export function AdminItems() {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const uploadToStorage = async (file: File, folder: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione um arquivo de imagem.');
-      return;
-    }
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
+    const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      // Deletar imagem antiga se existir
-      if (formData.capa_url) {
-        await deleteFromStorage(formData.capa_url);
+      const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (fileArray.length === 0) {
+        alert('Por favor, selecione apenas arquivos de imagem.');
+        return;
       }
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      // Se houver uma capa antiga e estivermos subindo apenas uma, poderíamos deletar, 
+      // mas para evitar erros prefiro apenas atualizar.
+      const coverUrl = await uploadToStorage(fileArray[0], 'products');
+      
+      // As demais vão para a galeria
+      const galleryUrls = await Promise.all(
+        fileArray.slice(1).map(file => uploadToStorage(file, 'products/gallery'))
+      );
 
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath);
-
-      setFormData(prev => ({ ...prev, capa_url: publicUrl }));
+      setFormData(prev => ({ 
+        ...prev, 
+        capa_url: coverUrl,
+        fotos: [...(prev.fotos || []), ...galleryUrls]
+      }));
     } catch (error: any) {
-      console.error('Error uploading file:', error);
-      alert('Erro ao fazer upload da imagem: ' + error.message);
+      console.error('Error uploading files:', error);
+      alert('Erro ao fazer upload: ' + error.message);
     } finally {
       setUploading(false);
     }
   };
 
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
+    const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      const newUrls: string[] = [];
+      const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
       
-      for (const file of Array.from(files)) {
-        if (!file.type.startsWith('image/')) continue;
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `products/gallery/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(filePath);
-
-        newUrls.push(publicUrl);
-      }
+      const newUrls = await Promise.all(
+        fileArray.map(file => uploadToStorage(file, 'products/gallery'))
+      );
 
       setFormData(prev => ({ 
         ...prev, 
@@ -534,6 +531,14 @@ export function AdminItems() {
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
+
+                              // Se forem arquivos externos do computador
+                              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                handleFileUpload(e.dataTransfer.files);
+                                return;
+                              }
+
                               const index = e.dataTransfer.getData('galleryIndex');
                               if (index !== '') {
                                 const idx = parseInt(index);
@@ -559,6 +564,7 @@ export function AdminItems() {
                           >
                             <input 
                               type="file" 
+                              multiple
                               accept="image/*"
                               onChange={handleFileUpload}
                               className="absolute inset-0 z-10 cursor-pointer opacity-0"
@@ -573,13 +579,13 @@ export function AdminItems() {
                               ) : (
                                 <div className="flex flex-col items-center gap-2">
                                   <Upload className="text-editorial-muted" size={24} />
-                                  <span className="text-[9px] font-bold uppercase tracking-[1px] text-editorial-muted">Subir Capa</span>
+                                  <span className="text-[9px] font-bold uppercase tracking-[1px] text-editorial-muted">Subir Capa / Várias</span>
                                 </div>
                               )}
                               {uploading && <Loader2 className="absolute animate-spin text-editorial-accent" size={24} />}
                             </div>
                             <div className="absolute inset-x-0 bottom-0 bg-editorial-ink/60 p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              <p className="text-[8px] text-white text-center font-bold uppercase tracking-[1px]">Solte uma imagem aqui para trocar</p>
+                              <p className="text-[8px] text-white text-center font-bold uppercase tracking-[1px]">Arraste aqui ou selecione várias fotos</p>
                             </div>
                           </div>
                         </div>
@@ -594,41 +600,54 @@ export function AdminItems() {
 
                       {/* Galeria */}
                       <div className="space-y-6">
-                        <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Fotos (Arraste para a capa)</label>
-                          <div className="grid grid-cols-3 gap-2">
-                            {formData.fotos?.map((url, idx) => (
-                              <div 
-                                key={idx} 
-                                draggable
-                                onDragStart={(e) => {
-                                  e.dataTransfer.setData('galleryIndex', idx.toString());
-                                }}
-                                className="relative aspect-square border border-editorial-border group cursor-move hover:ring-2 hover:ring-editorial-accent transition-all"
-                              >
-                                <img src={url} className="h-full w-full object-cover" alt={`Gallery ${idx}`} />
-                                <button 
-                                  type="button"
-                                  onClick={() => removeGalleryImage(idx)}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Fotos (Arraste arquivos aqui)</label>
+                            <div 
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  handleGalleryUpload(e.dataTransfer.files);
+                                }
+                              }}
+                              className="grid grid-cols-3 gap-2 p-2 border-2 border-transparent hover:border-editorial-accent/30 rounded-sm transition-all"
+                            >
+                              {formData.fotos?.map((url, idx) => (
+                                <div 
+                                  key={idx} 
+                                  draggable
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData('galleryIndex', idx.toString());
+                                  }}
+                                  className="relative aspect-square border border-editorial-border group cursor-move hover:ring-2 hover:ring-editorial-accent transition-all"
                                 >
-                                  <X size={10} />
-                                </button>
+                                  <img src={url} className="h-full w-full object-cover" alt={`Gallery ${idx}`} />
+                                  <button 
+                                    type="button"
+                                    onClick={() => removeGalleryImage(idx)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                                  >
+                                    <X size={10} />
+                                  </button>
+                                </div>
+                              ))}
+                              <div className="relative aspect-square border-2 border-dashed border-editorial-border flex items-center justify-center hover:border-editorial-accent transition-colors">
+                                <input 
+                                  type="file" 
+                                  multiple
+                                  accept="image/*"
+                                  onChange={handleGalleryUpload}
+                                  className="absolute inset-0 cursor-pointer opacity-0"
+                                  disabled={uploading}
+                                />
+                                <Plus size={20} className="text-editorial-muted" />
                               </div>
-                            ))}
-                            <div className="relative aspect-square border-2 border-dashed border-editorial-border flex items-center justify-center hover:border-editorial-accent transition-colors">
-                              <input 
-                                type="file" 
-                                multiple
-                                accept="image/*"
-                                onChange={handleGalleryUpload}
-                                className="absolute inset-0 cursor-pointer opacity-0"
-                                disabled={uploading}
-                              />
-                              <Plus size={20} className="text-editorial-muted" />
                             </div>
                           </div>
-                        </div>
                       </div>
                     </div>
                   </div>
