@@ -25,24 +25,24 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-editorial-bg-admin font-sans text-editorial-ink">
+    <div className="flex min-h-screen bg-editorial-bg-admin font-sans text-celebration-ink">
       {/* Mobile Menu Toggle */}
       <button 
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed bottom-6 left-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-editorial-ink text-white shadow-lg md:hidden"
+        className="fixed bottom-6 left-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-celebration-ink text-white shadow-lg md:hidden"
       >
         {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-72 transform border-r border-editorial-border bg-editorial-bg-admin transition-transform duration-300 md:relative md:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-72 transform border-r border-celebration-border bg-celebration-cream transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-full flex-col px-8 py-12">
           <div className="mb-16 flex flex-col gap-1">
-            <h1 className="text-[12px] font-bold uppercase tracking-[2px] text-editorial-ink">Gestão do Sistema</h1>
-            <span className="text-[10px] font-medium uppercase tracking-[1px] text-editorial-accent">Admin Console</span>
+            <h1 className="text-[12px] font-bold uppercase tracking-[2px] text-celebration-ink">Gestão do Sistema</h1>
+            <span className="text-[10px] font-medium uppercase tracking-[1px] text-celebration-pink">Admin Console</span>
           </div>
 
           <nav className="flex-grow space-y-2">
@@ -56,8 +56,8 @@ export function AdminLayout() {
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 text-[11px] font-bold uppercase tracking-[1px] transition-all",
                     isActive 
-                      ? "border border-editorial-ink bg-white text-editorial-ink" 
-                      : "text-editorial-muted hover:text-editorial-ink"
+                      ? "border border-celebration-ink bg-white text-celebration-ink" 
+                      : "text-celebration-muted hover:text-celebration-ink"
                   )}
                 >
                   <item.icon size={16} />
@@ -67,11 +67,11 @@ export function AdminLayout() {
             })}
           </nav>
 
-          <div className="mt-auto space-y-4 pt-8 border-t border-editorial-border">
+          <div className="mt-12 space-y-4 pt-8 border-t border-celebration-border">
             <Link 
               to="/" 
               target="_blank"
-              className="flex items-center justify-between border border-editorial-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-editorial-ink transition-all hover:bg-editorial-ink hover:text-white"
+              className="flex items-center justify-between border border-celebration-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-celebration-ink transition-all hover:bg-celebration-ink hover:text-white"
             >
               <span>Ver Site Público</span>
               <ExternalLink size={14} />
@@ -79,7 +79,7 @@ export function AdminLayout() {
 
             <button 
               onClick={handleLogout}
-              className="flex w-full items-center justify-between bg-editorial-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-white transition-opacity hover:opacity-90"
+              className="flex w-full items-center justify-between bg-celebration-ink px-6 py-4 text-[10px] font-bold uppercase tracking-[2px] text-white transition-opacity hover:opacity-90"
             >
               <span>Sair do Sistema</span>
               <LogOut size={14} />
