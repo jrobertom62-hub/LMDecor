@@ -15,10 +15,9 @@ export function KitCard({ kit, index }: KitCardProps) {
   const { config } = useOutletContext<{ config: SiteConfig }>();
   const { addToCart } = useCart();
 
-  const whatsappMessage = `Olá! Gostaria de saber mais sobre o item: ${kit.titulo} (Código: ${kit.codigo_produto})`;
-  const whatsappUrl = config?.whatsapp 
-    ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
-    : '#';
+  const whatsappMessage = `Olá! Gostaria de um orçamento para o item: ${kit.titulo}\nCódigo: ${kit.codigo_produto}\nTema: ${kit.tema || 'Neutro'}`;
+  const whatsappNumber = '5532985179487';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <motion.div
@@ -71,10 +70,7 @@ export function KitCard({ kit, index }: KitCardProps) {
 
         <div className="mt-auto flex items-end justify-between gap-4 pt-6 border-t border-editorial-border/30">
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold uppercase tracking-[2px] text-editorial-muted mb-1">Locação</span>
-            <span className="text-base sm:text-xl font-bold tracking-tight text-editorial-accent italic">
-              {formatCurrency(kit.preco_locacao)}
-            </span>
+            <span className="text-[9px] font-bold uppercase tracking-[2px] text-celebration-pink mb-1 animate-pulse">Solicitar Orçamento</span>
           </div>
           
           <div className="flex gap-1.5 sm:gap-2">

@@ -16,12 +16,10 @@ export function Cart() {
     cart.forEach(item => {
       message += `• ${item.titulo} (Qtd: ${item.quantity}) - Código: ${item.codigo_produto}\n`;
     });
-    message += `\n*Valor Total Estimado: ${formatCurrency(totalValue)}*`;
-    message += `\n\nFico no aguardo do retorno!`;
+    message += `\n*Por favor, me envie um orçamento para estes itens!*`;
 
-    const whatsappUrl = config?.whatsapp 
-      ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-      : '#';
+    const whatsappNumber = '5532985179487';
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
   };
@@ -115,7 +113,7 @@ export function Cart() {
                         <Plus size={12} />
                       </button>
                     </div>
-                    <span className="font-bold text-celebration-pink">{formatCurrency(item.preco_locacao * item.quantity)}</span>
+                    <span className="font-bold text-celebration-pink">Solicitar Orçamento</span>
                   </div>
                 </div>
               </motion.div>
@@ -128,16 +126,11 @@ export function Cart() {
               <h3 className="font-serif text-xl text-celebration-ink mb-6">Resumo</h3>
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-sm">
-                  <span className="text-celebration-muted">Subtotal</span>
-                  <span className="font-medium text-celebration-ink">{formatCurrency(totalValue)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-celebration-muted">Taxa de Entrega</span>
-                  <span className="text-[10px] font-bold uppercase tracking-[1px] text-emerald-600">A combinar</span>
+                  <span className="text-celebration-muted">Quantidade de Itens</span>
+                  <span className="font-medium text-celebration-ink">{cartCount}</span>
                 </div>
                 <div className="pt-4 border-t border-celebration-border flex justify-between">
-                  <span className="font-bold text-celebration-ink">Total Estimado</span>
-                  <span className="font-bold text-2xl text-celebration-pink">{formatCurrency(totalValue)}</span>
+                  <span className="font-bold text-celebration-ink italic">Orçamento no WhatsApp</span>
                 </div>
               </div>
 

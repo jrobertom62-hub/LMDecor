@@ -99,10 +99,9 @@ export function ProductDetails() {
     setActiveMedia(allMedia[prevIdx]);
   };
 
-  const whatsappMessage = `Olá! Tenho interesse no kit/item código ${product.codigo_produto}. Pode me passar mais informações? (Item: ${product.titulo})`;
-  const whatsappUrl = config?.whatsapp 
-    ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
-    : '#';
+  const whatsappNumber = '5532985179487';
+  const whatsappMessage = `Olá! Gostaria de um orçamento para o item: ${product.titulo}\nCódigo: ${product.codigo_produto}\nTema: ${product.tema || 'Neutro'}${product.dimensoes ? `\nDimensões: ${product.dimensoes}` : ''}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <div className="min-h-screen bg-celebration-cream/30">
@@ -219,10 +218,7 @@ export function ProductDetails() {
           </div>
 
           <div className="mt-10 mb-12">
-            <span className="text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted block mb-2">Locação</span>
-            <span className="text-4xl font-light tracking-tighter text-editorial-accent italic">
-              {formatCurrency(product.preco_locacao)}
-            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[2px] text-celebration-pink animate-pulse">Orçamento sob consulta</span>
           </div>
 
           <div className="my-10 h-px w-full bg-editorial-border"></div>
