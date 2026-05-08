@@ -36,14 +36,12 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-celebration-cream/30">
       {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/hero-banner.png" 
-            alt="Festa Premium" 
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-celebration-ink/60 to-transparent" />
+      <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden bg-white">
+        {/* Aurora / Mesh Gradient Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute -left-[10%] -top-[10%] h-[70%] w-[70%] rounded-full bg-celebration-pink/15 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute -right-[10%] top-[20%] h-[60%] w-[60%] rounded-full bg-celebration-purple/10 blur-[100px] animate-pulse" style={{ animationDuration: '10s' }} />
+          <div className="absolute left-[20%] -bottom-[20%] h-[50%] w-[50%] rounded-full bg-celebration-gold/10 blur-[80px]" />
         </div>
         
         <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-4 md:px-8">
@@ -53,13 +51,13 @@ export function HomePage() {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <span className="mb-4 inline-block text-[10px] font-bold uppercase tracking-[4px] text-celebration-pink bg-white/90 px-4 py-1.5 rounded-full shadow-sm">
+            <span className="mb-4 inline-block text-[10px] font-bold uppercase tracking-[4px] text-celebration-pink bg-celebration-pink/5 px-4 py-1.5 rounded-full border border-celebration-pink/10">
               LM Decor Celebrações
             </span>
-            <h1 className="mb-6 font-serif text-4xl leading-tight text-white md:text-6xl lg:text-7xl italic">
-              Transformamos sonhos em <span className="text-celebration-pink">cenários mágicos</span>.
+            <h1 className="mb-6 font-serif text-4xl leading-tight text-celebration-ink md:text-6xl lg:text-7xl italic">
+              Transformamos sonhos em <span className="text-celebration-pink underline decoration-celebration-pink/20 underline-offset-8">cenários mágicos</span>.
             </h1>
-            <p className="mb-10 text-lg text-white/90 font-light leading-relaxed max-w-lg">
+            <p className="mb-10 text-lg text-celebration-muted font-light leading-relaxed max-w-lg">
               Curadoria exclusiva de kits e itens para festas que tornam cada celebração um evento memorável e sofisticado.
             </p>
             <div className="flex flex-wrap gap-4">
