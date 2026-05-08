@@ -15,11 +15,13 @@ import { PublicLayout } from './pages/public/PublicLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { CartProvider } from './context/CartContext';
 import { Cart } from './pages/public/Cart';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
-    <CartProvider>
-      <Router>
+    <Router>
+      <ScrollToTop />
+      <CartProvider>
         <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
