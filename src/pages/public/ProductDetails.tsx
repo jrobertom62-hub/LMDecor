@@ -59,7 +59,7 @@ export function ProductDetails() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-editorial-ink border-t-transparent"></div>
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-celebration-ink border-t-transparent"></div>
       </div>
     );
   }
@@ -67,10 +67,10 @@ export function ProductDetails() {
   if (error || !product) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-32 text-center md:px-8">
-        <AlertCircle className="mx-auto mb-6 h-12 w-12 text-editorial-muted/30" />
-        <h2 className="font-serif text-3xl text-editorial-ink italic">Produto indisponível</h2>
-        <p className="mt-4 text-editorial-muted">Este item não está mais disponível no catálogo ou o link está incorreto.</p>
-        <Link to="/" className="mt-12 inline-block border border-editorial-ink px-10 py-4 text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink transition-all hover:bg-editorial-ink hover:text-white">
+        <AlertCircle className="mx-auto mb-6 h-12 w-12 text-celebration-muted/30" />
+        <h2 className="font-serif text-3xl text-celebration-ink italic">Produto indisponível</h2>
+        <p className="mt-4 text-celebration-muted">Este item não está mais disponível no catálogo ou o link está incorreto.</p>
+        <Link to="/" className="mt-12 inline-block border border-celebration-ink px-10 py-4 text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink transition-all hover:bg-celebration-ink hover:text-white">
           Voltar ao Início
         </Link>
       </div>
@@ -108,7 +108,7 @@ export function ProductDetails() {
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:py-24">
       <button 
         onClick={handleBack} 
-        className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted transition-colors hover:text-editorial-ink"
+        className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[2px] text-celebration-muted transition-colors hover:text-celebration-ink"
       >
         <ChevronLeft size={14} /> Voltar
       </button>
@@ -120,7 +120,7 @@ export function ProductDetails() {
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6"
         >
-          <div className="group relative aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border rounded-xl">
+          <div className="group relative aspect-[4/5] overflow-hidden bg-neutral-100 border border-celebration-border rounded-xl">
             {activeMedia && isVideo(activeMedia) ? (
               <video 
                 src={activeMedia} 
@@ -144,13 +144,13 @@ export function ProductDetails() {
               <>
                 <button 
                   onClick={(e) => { e.preventDefault(); prevMedia(); }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-editorial-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-celebration-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button 
                   onClick={(e) => { e.preventDefault(); nextMedia(); }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-editorial-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-celebration-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
                 >
                   <ChevronRight size={20} />
                 </button>
@@ -169,7 +169,7 @@ export function ProductDetails() {
                   }}
                   className={cn(
                     "aspect-square border transition-all overflow-hidden relative rounded-lg",
-                    activeMedia === media ? "border-celebration-pink scale-95 ring-2 ring-celebration-pink/20" : "border-editorial-border hover:border-editorial-accent"
+                    activeMedia === media ? "border-celebration-pink scale-95 ring-2 ring-celebration-pink/20" : "border-celebration-border hover:border-celebration-pink"
                   )}
                 >
                   {isVideo(media) ? (
@@ -197,36 +197,38 @@ export function ProductDetails() {
           className="flex flex-col"
         >
           <div className="flex flex-wrap gap-3 mb-6">
-             <span className="bg-editorial-bg-admin px-3 py-1 text-[9px] font-bold uppercase tracking-[2px] text-editorial-muted border border-editorial-border">
+             <span className="bg-white px-3 py-1 text-[9px] font-bold uppercase tracking-[2px] text-celebration-muted border border-celebration-border">
               {product.tipo.replace('_', ' ')}
             </span>
             {product.destaque && (
-              <span className="bg-editorial-ink px-3 py-1 text-[9px] font-bold uppercase tracking-[2px] text-white">
+              <span className="bg-celebration-ink px-3 py-1 text-[9px] font-bold uppercase tracking-[2px] text-white">
                 Destaque Especial
               </span>
             )}
           </div>
 
-          <h1 className="font-serif text-4xl text-editorial-ink md:text-5xl lg:text-6xl leading-tight">
+          <h1 className="font-serif text-4xl text-celebration-ink md:text-5xl lg:text-6xl leading-tight">
             {product.titulo}
           </h1>
           
           <div className="mt-4 flex items-center gap-3">
-             <span className="text-[10px] font-bold font-mono text-editorial-muted border border-editorial-border px-3 py-1 bg-neutral-50">
+             <span className="text-[10px] font-bold font-mono text-celebration-muted border border-celebration-border px-3 py-1 bg-neutral-50">
                CÓD: {product.codigo_produto}
              </span>
           </div>
 
-          <div className="mt-10 mb-12">
-            <span className="text-[10px] font-bold uppercase tracking-[2px] text-celebration-pink animate-pulse">Orçamento sob consulta</span>
+          <div className="mt-4 mb-8">
+            <span className="inline-block text-[11px] font-bold uppercase tracking-[2px] text-celebration-pink bg-celebration-pink/5 px-4 py-2 rounded-lg border border-celebration-pink/10 animate-pulse">
+              Orçamento sob consulta
+            </span>
           </div>
 
-          <div className="my-10 h-px w-full bg-editorial-border"></div>
+          <div className="my-8 h-px w-full bg-celebration-border"></div>
 
           <div className="space-y-8">
             <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink mb-4">Sobre este item</h3>
-              <p className="text-editorial-muted text-sm leading-relaxed whitespace-pre-wrap">
+              <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink mb-4">Sobre este item</h3>
+              <p className="text-celebration-muted text-sm leading-relaxed whitespace-pre-wrap">
                 {product.descricao || 'Sem descrição detalhada disponível.'}
               </p>
             </div>
@@ -234,40 +236,40 @@ export function ProductDetails() {
             <div className="grid gap-8 sm:grid-cols-2">
                {product.tema && (
                 <div className="flex items-start gap-3">
-                  <Tag className="text-editorial-accent shrink-0 mt-0.5" size={16} />
+                  <Tag className="text-celebration-pink shrink-0 mt-0.5" size={16} />
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-ink">Tema</h4>
-                    <p className="text-sm text-editorial-muted">{product.tema}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-ink">Tema</h4>
+                    <p className="text-sm text-celebration-muted">{product.tema}</p>
                   </div>
                 </div>
                )}
                {product.dimensoes && (
                 <div className="flex items-start gap-3">
-                  <Ruler className="text-editorial-accent shrink-0 mt-0.5" size={16} />
+                  <Ruler className="text-celebration-pink shrink-0 mt-0.5" size={16} />
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-ink">Dimensões</h4>
-                    <p className="text-sm text-editorial-muted">{product.dimensoes}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-ink">Dimensões</h4>
+                    <p className="text-sm text-celebration-muted">{product.dimensoes}</p>
                   </div>
                 </div>
                )}
                {product.cores && product.cores.length > 0 && (
                 <div className="flex items-start gap-3">
-                  <Palette className="text-editorial-accent shrink-0 mt-0.5" size={16} />
+                  <Palette className="text-celebration-pink shrink-0 mt-0.5" size={16} />
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-ink">Cores</h4>
-                    <p className="text-sm text-editorial-muted">{product.cores.join(', ')}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-ink">Cores</h4>
+                    <p className="text-sm text-celebration-muted">{product.cores.join(', ')}</p>
                   </div>
                 </div>
                )}
             </div>
 
             {product.itens_inclusos && (
-              <div className="bg-editorial-bg-admin p-8 border border-editorial-border rounded-sm">
+              <div className="bg-white p-8 border border-celebration-border rounded-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <Package className="text-editorial-ink" size={16} />
-                  <h4 className="text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink">O que está incluso:</h4>
+                  <Package className="text-celebration-ink" size={16} />
+                  <h4 className="text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink">O que está incluso:</h4>
                 </div>
-                <div className="text-sm text-editorial-muted whitespace-pre-wrap">
+                <div className="text-sm text-celebration-muted whitespace-pre-wrap">
                   {product.itens_inclusos}
                 </div>
               </div>
