@@ -1,9 +1,10 @@
 import { KitItem } from '../../types';
 import { formatCurrency } from '../../lib/utils';
 import { motion } from 'motion/react';
-import { MessageCircle, Eye } from 'lucide-react';
+import { MessageCircle, Eye, Plus } from 'lucide-react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { SiteConfig } from '../../types';
+import { useCart } from '../../context/CartContext';
 
 interface KitCardProps {
   kit: KitItem;
@@ -12,6 +13,7 @@ interface KitCardProps {
 
 export function KitCard({ kit, index }: KitCardProps) {
   const { config } = useOutletContext<{ config: SiteConfig }>();
+  const { addToCart } = useCart();
 
   const whatsappMessage = `Olá! Gostaria de saber mais sobre o item: ${kit.titulo} (Código: ${kit.codigo_produto})`;
   const whatsappUrl = config?.whatsapp 
@@ -76,9 +78,16 @@ export function KitCard({ kit, index }: KitCardProps) {
           </div>
           
           <div className="flex gap-1.5 sm:gap-2">
+            <button 
+              onClick={() => addToCart(kit)}
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-celebration-pink bg-white text-celebration-pink transition-all hover:bg-celebration-pink hover:text-white rounded-full shadow-lg shadow-celebration-pink/5"
+              title="Adicionar ao carrinho"
+            >
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
             <Link 
               to={`/produto/${kit.id}`}
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-editorial-border text-editorial-muted transition-all hover:border-editorial-ink hover:text-editorial-ink"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-celebration-border text-celebration-muted transition-all hover:border-celebration-ink hover:text-editorial-ink rounded-full"
               title="Ver detalhes"
             >
               <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

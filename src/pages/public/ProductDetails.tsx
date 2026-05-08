@@ -3,14 +3,17 @@ import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom
 import { supabase } from '../../lib/supabase';
 import { KitItem, SiteConfig } from '../../types';
 import { motion } from 'motion/react';
-import { MessageCircle, ChevronLeft, ChevronRight, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MessageCircle, ChevronLeft, ChevronRight, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle, ShoppingCart, Plus, Check } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 import { formatCurrency, cn } from '../../lib/utils';
 
 export function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { config } = useOutletContext<{ config: SiteConfig }>();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState<KitItem | null>(null);
+  const [added, setAdded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeMedia, setActiveMedia] = useState<string | null>(null);
@@ -275,21 +278,35 @@ export function ProductDetails() {
             )}
           </div>
 
-          <div className="mt-16 flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <button 
+              onClick={() => {
+                if (product) {
+                  addToCart(product);
+                  setAdded(true);
+                  setTimeout(() => setAdded(false), 2000);
+                }
+              }}
+              className="flex flex-1 items-center justify-center gap-3 bg-celebration-pink px-12 py-5 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:opacity-90 hover:scale-[1.02] shadow-xl shadow-celebration-pink/20"
+            >
+              {added ? <Check size={18} /> : <ShoppingCart size={18} />}
+              {added ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+            </button>
+
             <a 
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 bg-editorial-ink px-12 py-5 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:opacity-90 hover:scale-[1.02]"
+              className="flex flex-1 items-center justify-center gap-3 border border-celebration-ink px-12 py-5 text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink transition-all hover:bg-celebration-ink hover:text-white hover:scale-[1.02]"
             >
               <MessageCircle size={18} />
-              Solicitar Locação
+              Solicitar agora
             </a>
-            
-            <div className="flex items-center gap-2 text-emerald-600">
-               <CheckCircle2 size={16} />
-               <span className="text-[10px] font-bold uppercase tracking-[1px]">Item Disponível</span>
-            </div>
+          </div>
+
+          <div className="mt-6 flex items-center gap-2 text-emerald-600">
+             <CheckCircle2 size={16} />
+             <span className="text-[10px] font-bold uppercase tracking-[1px]">Item Disponível para Locação</span>
           </div>
         </motion.div>
       </div>
