@@ -77,7 +77,7 @@ export function HomePage() {
                 <option value="item_avulso">AVULSOS</option>
                 <option value="painel">PAINÉIS</option>
                 <option value="mesa">MESAS</option>
-                <option value="baloes">BALÕES</option>
+                <option value="bolos_fakes">BOLOS FAKES</option>
                 <option value="outros">OUTROS</option>
               </select>
             </div>

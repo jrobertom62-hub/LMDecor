@@ -338,7 +338,7 @@ export function AdminItems() {
           <option value="item_avulso">ITENS AVULSOS</option>
           <option value="painel">PAINÉIS</option>
           <option value="mesa">MESAS</option>
-          <option value="baloes">BALÕES</option>
+          <option value="bolos_fakes">BOLOS FAKES</option>
           <option value="outros">OUTROS</option>
         </select>
         <select 
@@ -428,7 +428,7 @@ export function AdminItems() {
                           <option value="item_avulso">Item Avulso</option>
                           <option value="painel">Painel</option>
                           <option value="mesa">Mesa</option>
-                          <option value="baloes">Balões</option>
+                          <option value="bolos_fakes">Bolos Fakes</option>
                           <option value="outros">Outros</option>
                         </select>
                       </div>
@@ -575,7 +575,23 @@ export function AdminItems() {
                               uploading && "opacity-50"
                             )}>
                               {formData.capa_url ? (
-                                <img src={formData.capa_url} className="h-full w-full object-cover" alt="Capa" />
+                                <div className="relative h-full w-full group/capa">
+                                  <img src={formData.capa_url} className="h-full w-full object-cover" alt="Capa" />
+                                  <button 
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (confirm('Deseja remover esta foto de capa?')) {
+                                        setFormData(prev => ({ ...prev, capa_url: '' }));
+                                      }
+                                    }}
+                                    className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2.5 shadow-2xl z-[30] hover:bg-red-600 transition-all opacity-0 group-hover/capa:opacity-100"
+                                    title="Remover foto"
+                                  >
+                                    <Trash2 size={18} />
+                                  </button>
+                                </div>
                               ) : (
                                 <div className="flex flex-col items-center gap-2">
                                   <Upload className="text-editorial-muted" size={24} />

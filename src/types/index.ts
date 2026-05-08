@@ -1,4 +1,4 @@
-export type KitItemType = 'kit_completo' | 'item_avulso' | 'painel' | 'mesa' | 'baloes' | 'outros';
+export type KitItemType = 'kit_completo' | 'item_avulso' | 'painel' | 'mesa' | 'bolos_fakes' | 'outros';
 
 export interface KitItem {
   id: string;
