@@ -36,7 +36,7 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-celebration-cream/30">
       {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden bg-white">
+      <section className="relative min-h-[80vh] md:min-h-[90vh] w-full overflow-hidden bg-white flex items-center pt-20">
         {/* Aurora / Mesh Gradient Background */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <div className="absolute -left-[10%] -top-[10%] h-[70%] w-[70%] rounded-full bg-celebration-pink/15 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
@@ -44,7 +44,7 @@ export function HomePage() {
           <div className="absolute left-[20%] -bottom-[20%] h-[50%] w-[50%] rounded-full bg-celebration-gold/10 blur-[80px]" />
         </div>
         
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center items-center text-center px-4 md:px-8">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col justify-center items-center text-center px-4 md:px-8 py-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -79,11 +79,11 @@ export function HomePage() {
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-serif text-3xl md:text-5xl lg:text-7xl font-light tracking-tight text-editorial-ink"
+          className="font-serif text-3xl md:text-5xl lg:text-7xl font-light tracking-tight text-celebration-ink"
         >
           Alugue e decore seu momento.
         </motion.h1>
-        <div className="mx-auto mt-6 md:mt-8 h-px w-16 md:w-24 bg-editorial-accent"></div>
+        <div className="mx-auto mt-6 md:mt-8 h-px w-16 md:w-24 bg-celebration-pink"></div>
       </div>
 
       {/* Filters & Search */}
@@ -91,13 +91,13 @@ export function HomePage() {
         <div className="grid grid-cols-1 md:flex md:flex-wrap gap-4 md:gap-6 md:items-end">
           {/* Search */}
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-4 top-1/2 h-3 w-3 -translate-y-1/2 text-editorial-muted" />
+            <Search className="absolute left-4 top-1/2 h-3 w-3 -translate-y-1/2 text-celebration-muted" />
             <input 
               type="text" 
               placeholder="BUSCAR NO CATÁLOGO..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border-b border-editorial-border bg-transparent py-3 md:py-4 pl-9 pr-4 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+              className="w-full border-b border-celebration-border bg-transparent py-3 md:py-4 pl-9 pr-4 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-celebration-pink"
             />
           </div>
 
@@ -105,11 +105,11 @@ export function HomePage() {
           <div className="grid grid-cols-2 gap-4 md:flex md:gap-6">
             {/* Type Filter */}
             <div className="flex flex-col gap-1 md:gap-2">
-              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-editorial-muted ml-1">Coleção</span>
+              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-celebration-muted ml-1">Coleção</span>
               <select 
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as any)}
-                className="cursor-pointer border-b border-editorial-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+                className="cursor-pointer border-b border-celebration-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-celebration-pink"
               >
                 <option value="all">TODAS</option>
                 <option value="kit_completo">KITS</option>
@@ -123,11 +123,11 @@ export function HomePage() {
 
             {/* Theme Filter */}
             <div className="flex flex-col gap-1 md:gap-2">
-              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-editorial-muted ml-1">Tema</span>
+              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[1px] md:tracking-[2px] text-celebration-muted ml-1">Tema</span>
               <select 
                 value={selectedTheme}
                 onChange={(e) => setSelectedTheme(e.target.value)}
-                className="cursor-pointer border-b border-editorial-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-editorial-accent"
+                className="cursor-pointer border-b border-celebration-border bg-transparent py-3 md:py-4 px-2 text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] outline-none transition-all focus:border-celebration-pink"
               >
                 <option value="all">TODOS</option>
                 {themes.filter(t => t !== 'all').map(theme => (
@@ -138,8 +138,8 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted border-t md:border-none pt-4 md:pt-0">
-          <span className="text-editorial-ink">{filteredKits.length}</span> Peças Disponíveis
+        <div className="text-[9px] md:text-[10px] font-bold uppercase tracking-[2px] text-celebration-muted border-t md:border-none pt-4 md:pt-0">
+          <span className="text-celebration-ink">{filteredKits.length}</span> Peças Disponíveis
         </div>
       </div>
 
