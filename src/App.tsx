@@ -49,8 +49,8 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </Router>
-    </CartProvider>
+      </CartProvider>
+    </Router>
   );
 }
 
