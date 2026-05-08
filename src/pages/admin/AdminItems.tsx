@@ -100,87 +100,55 @@ export function AdminItems() {
     return publicUrl;
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList, area: 'capa' | 'galeria' | 'video') => {
     const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
-      if (fileArray.length === 0) {
-        alert('Por favor, selecione apenas arquivos de imagem.');
+      const fileArray = Array.from(files);
+      const images = fileArray.filter(f => f.type.startsWith('image/'));
+      const videos = fileArray.filter(f => f.type.startsWith('video/'));
+
+      if (images.length === 0 && videos.length === 0) {
+        alert('Por favor, selecione arquivos de imagem ou vídeo (MP4).');
         return;
       }
 
-      // Se houver uma capa antiga e estivermos subindo apenas uma, poderíamos deletar, 
-      // mas para evitar erros prefiro apenas atualizar.
-      const coverUrl = await uploadToStorage(fileArray[0], 'products');
-      
-      // As demais vão para a galeria
-      const galleryUrls = await Promise.all(
-        fileArray.slice(1).map(file => uploadToStorage(file, 'products/gallery'))
-      );
+      let newCapaUrl = formData.capa_url;
+      const newGalleryUrls: string[] = [];
+      const newVideoUrls: string[] = [];
 
-      setFormData(prev => ({ 
-        ...prev, 
-        capa_url: coverUrl,
-        fotos: [...(prev.fotos || []), ...galleryUrls]
-      }));
-    } catch (error: any) {
-      console.error('Error uploading files:', error);
-      alert('Erro ao fazer upload: ' + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
-    const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    try {
-      const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
-      
-      const newUrls = await Promise.all(
-        fileArray.map(file => uploadToStorage(file, 'products/gallery'))
-      );
-
-      setFormData(prev => ({ 
-        ...prev, 
-        fotos: [...(prev.fotos || []), ...newUrls] 
-      }));
-    } catch (error: any) {
-      console.error('Gallery upload error:', error);
-      alert('Erro ao subir galeria: ' + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
-    const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    try {
-      const fileArray = Array.from(files).filter(f => f.type.startsWith('video/'));
-      if (fileArray.length === 0) {
-        alert('Por favor, selecione apenas arquivos de vídeo.');
-        return;
+      // Upload de Imagens
+      if (images.length > 0) {
+        if (area === 'capa') {
+          newCapaUrl = await uploadToStorage(images[0], 'products');
+          const remaining = await Promise.all(images.slice(1).map(f => uploadToStorage(f, 'products/gallery')));
+          newGalleryUrls.push(...remaining);
+        } else {
+          const uploaded = await Promise.all(images.map(f => uploadToStorage(f, 'products/gallery')));
+          newGalleryUrls.push(...uploaded);
+        }
       }
-      
-      const newUrls = await Promise.all(
-        fileArray.map(file => uploadToStorage(file, 'products/videos'))
-      );
 
-      setFormData(prev => ({ 
-        ...prev, 
-        videos: [...(prev.videos || []), ...newUrls] 
+      // Upload de Vídeos
+      if (videos.length > 0) {
+        const uploaded = await Promise.all(videos.map(f => uploadToStorage(f, 'products/videos')));
+        newVideoUrls.push(...uploaded);
+        if (area !== 'video' && images.length === 0) {
+          alert('Os vídeos foram adicionados automaticamente à galeria de vídeos.');
+        }
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        capa_url: newCapaUrl,
+        fotos: [...(prev.fotos || []), ...newGalleryUrls],
+        videos: [...(prev.videos || []), ...newVideoUrls]
       }));
     } catch (error: any) {
-      console.error('Video upload error:', error);
-      alert('Erro ao subir vídeos: ' + error.message);
+      console.error('Upload error:', error);
+      alert('Erro no upload: ' + error.message);
     } finally {
       setUploading(false);
     }
@@ -578,7 +546,7 @@ export function AdminItems() {
 
                               // Se forem arquivos externos do computador
                               if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                                handleFileUpload(e.dataTransfer.files);
+                                handleMediaUpload(e.dataTransfer.files, 'capa');
                                 return;
                               }
 
@@ -608,8 +576,8 @@ export function AdminItems() {
                             <input 
                               type="file" 
                               multiple
-                              accept="image/*"
-                              onChange={handleFileUpload}
+                              accept="image/*,video/*"
+                              onChange={(e) => handleMediaUpload(e, 'capa')}
                               className="absolute inset-0 z-10 cursor-pointer opacity-0"
                               disabled={uploading}
                             />
@@ -670,7 +638,7 @@ export function AdminItems() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                                  handleGalleryUpload(e.dataTransfer.files);
+                                  handleMediaUpload(e.dataTransfer.files, 'galeria');
                                 }
                               }}
                               className="grid grid-cols-3 gap-2 p-2 border-2 border-transparent hover:border-editorial-accent/30 rounded-sm transition-all"
@@ -717,8 +685,8 @@ export function AdminItems() {
                                 <input 
                                   type="file" 
                                   multiple
-                                  accept="image/*"
-                                  onChange={handleGalleryUpload}
+                                  accept="image/*,video/*"
+                                  onChange={(e) => handleMediaUpload(e, 'galeria')}
                                   className="absolute inset-0 cursor-pointer opacity-0"
                                   disabled={uploading}
                                 />
@@ -739,7 +707,7 @@ export function AdminItems() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                                  handleVideoUpload(e.dataTransfer.files);
+                                  handleMediaUpload(e.dataTransfer.files, 'video');
                                 }
                               }}
                               className="grid grid-cols-3 gap-2 p-2 border-2 border-transparent hover:border-editorial-accent/30 rounded-sm transition-all"
@@ -789,8 +757,8 @@ export function AdminItems() {
                                 <input 
                                   type="file" 
                                   multiple
-                                  accept="video/*"
-                                  onChange={handleVideoUpload}
+                                  accept="video/*,image/*"
+                                  onChange={(e) => handleMediaUpload(e, 'video')}
                                   className="absolute inset-0 cursor-pointer opacity-0"
                                   disabled={uploading}
                                 />

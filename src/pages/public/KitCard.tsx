@@ -55,9 +55,9 @@ export function KitCard({ kit, index }: KitCardProps) {
       </Link>
 
       {/* Content */}
-      <div className="flex flex-grow flex-col p-6">
+      <div className="flex flex-grow flex-col p-4 sm:p-6">
         <div className="mb-2 flex flex-col gap-1">
-          <Link to={`/produto/${kit.id}`} className="font-serif text-lg leading-tight text-editorial-ink hover:text-editorial-accent transition-colors">
+          <Link to={`/produto/${kit.id}`} className="font-serif text-base sm:text-lg leading-tight text-editorial-ink hover:text-editorial-accent transition-colors line-clamp-2">
             {kit.titulo}
           </Link>
           <span className="text-[9px] font-bold font-mono text-editorial-muted">CÓD: {kit.codigo_produto}</span>
@@ -70,27 +70,27 @@ export function KitCard({ kit, index }: KitCardProps) {
         <div className="mt-auto flex items-end justify-between gap-4 pt-6 border-t border-editorial-border/30">
           <div className="flex flex-col">
             <span className="text-[9px] font-bold uppercase tracking-[2px] text-editorial-muted mb-1">Locação</span>
-            <span className="text-xl font-bold tracking-tight text-editorial-accent italic">
+            <span className="text-base sm:text-xl font-bold tracking-tight text-editorial-accent italic">
               {formatCurrency(kit.preco_locacao)}
             </span>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 sm:gap-2">
             <Link 
               to={`/produto/${kit.id}`}
-              className="flex h-10 w-10 items-center justify-center border border-editorial-border text-editorial-muted transition-all hover:border-editorial-ink hover:text-editorial-ink"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-editorial-border text-editorial-muted transition-all hover:border-editorial-ink hover:text-editorial-ink"
               title="Ver detalhes"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Link>
             <a 
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-10 w-10 items-center justify-center border border-editorial-ink bg-editorial-ink text-white transition-all hover:bg-transparent hover:text-editorial-ink"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-editorial-ink bg-editorial-ink text-white transition-all hover:bg-transparent hover:text-editorial-ink"
               title="Solicitar via WhatsApp"
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </a>
           </div>
         </div>
