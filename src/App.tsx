@@ -11,6 +11,7 @@ import { AdminAiLogs } from './pages/admin/AdminAiLogs';
 import { AdminApiDocs } from './pages/admin/AdminApiDocs';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminLayout } from './pages/admin/AdminLayout';
+import { PublicLayout } from './pages/public/PublicLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { CartProvider } from './context/CartContext';
 import { Cart } from './pages/public/Cart';
