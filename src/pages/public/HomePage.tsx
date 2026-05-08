@@ -54,7 +54,7 @@ export function HomePage() {
             <span className="mb-4 inline-block text-[10px] font-bold uppercase tracking-[4px] text-celebration-pink bg-celebration-pink/5 px-4 py-1.5 rounded-full border border-celebration-pink/10">
               LM Decor Celebrações
             </span>
-            <h1 className="mb-6 font-serif text-5xl leading-tight text-celebration-ink md:text-7xl lg:text-8xl italic">
+            <h1 className="mb-6 font-serif text-4xl leading-tight text-celebration-ink md:text-7xl lg:text-8xl italic">
               Transformamos sonhos em <span className="text-celebration-pink underline decoration-celebration-pink/20 underline-offset-8">cenários mágicos</span>.
             </h1>
             <p className="mb-10 text-lg md:text-xl text-celebration-muted font-light leading-relaxed max-w-2xl mx-auto">

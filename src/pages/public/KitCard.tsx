@@ -68,35 +68,40 @@ export function KitCard({ kit, index }: KitCardProps) {
           {kit.tema || 'Neutro'} {kit.dimensoes ? `• ${kit.dimensoes}` : ''}
         </p>
 
-        <div className="mt-auto flex items-end justify-between gap-4 pt-6 border-t border-editorial-border/30">
-          <div className="flex flex-col">
-            <span className="text-[9px] font-bold uppercase tracking-[2px] text-celebration-pink mb-1 animate-pulse">Solicitar Orçamento</span>
-          </div>
-          
-          <div className="flex gap-1.5 sm:gap-2">
-            <button 
-              onClick={() => addToCart(kit)}
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-celebration-pink bg-white text-celebration-pink transition-all hover:bg-celebration-pink hover:text-white rounded-full shadow-lg shadow-celebration-pink/5"
-              title="Adicionar ao carrinho"
-            >
-              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </button>
-            <Link 
-              to={`/produto/${kit.id}`}
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-celebration-border text-celebration-muted transition-all hover:border-celebration-ink hover:text-editorial-ink rounded-full"
-              title="Ver detalhes"
-            >
-              <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Link>
-            <a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-celebration-pink bg-celebration-pink text-white transition-all hover:bg-transparent hover:text-celebration-pink rounded-full shadow-lg shadow-celebration-pink/20"
-              title="Solicitar via WhatsApp"
-            >
-              <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </a>
+        <div className="mt-auto pt-6 border-t border-celebration-border/30">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold uppercase tracking-[1px] text-celebration-pink/60">Sob Consulta</span>
+              <span className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-pink animate-pulse">Orçamento</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => { e.preventDefault(); addToCart(kit); }}
+                className="flex h-10 w-10 items-center justify-center border border-celebration-pink/20 bg-celebration-pink/5 text-celebration-pink transition-all hover:bg-celebration-pink hover:text-white rounded-full"
+                title="Adicionar ao carrinho"
+              >
+                <Plus size={18} />
+              </button>
+              
+              <Link 
+                to={`/produto/${kit.id}`}
+                className="flex h-10 w-10 items-center justify-center border border-celebration-border text-celebration-muted transition-all hover:bg-celebration-ink hover:text-white rounded-full"
+                title="Ver detalhes"
+              >
+                <Eye size={18} />
+              </Link>
+
+              <a 
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center bg-celebration-pink text-white transition-all hover:scale-105 rounded-full shadow-lg shadow-celebration-pink/20"
+                title="Solicitar via WhatsApp"
+              >
+                <MessageCircle size={18} />
+              </a>
+            </div>
           </div>
         </div>
       </div>
