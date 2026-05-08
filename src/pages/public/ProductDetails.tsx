@@ -3,7 +3,7 @@ import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom
 import { supabase } from '../../lib/supabase';
 import { KitItem, SiteConfig } from '../../types';
 import { motion } from 'motion/react';
-import { MessageCircle, ChevronLeft, ChevronRight, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle, ShoppingCart, Plus, Check } from 'lucide-react';
+import { MessageCircle, ChevronLeft, ChevronRight, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle, ShoppingCart, Plus, Check, Eye } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency, cn } from '../../lib/utils';
 
