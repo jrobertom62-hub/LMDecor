@@ -28,7 +28,7 @@ export function AdminConfig() {
           .from('site_config')
           .select('*')
           .eq('id', 1)
-          .single();
+          .maybeSingle();
         
         if (data) {
           setFormData(data as SiteConfig);
@@ -77,14 +77,14 @@ export function AdminConfig() {
     <div className="space-y-16">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-serif text-editorial-ink">Configurações</h2>
-          <p className="text-[10px] font-bold uppercase tracking-[2px] text-editorial-muted mt-2">Identidade e Dados Institucionais</p>
+          <h2 className="text-3xl font-serif text-celebration-ink">Configurações</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[2px] text-celebration-muted mt-2">Identidade e Dados Institucionais</p>
         </div>
         
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 bg-editorial-ink px-8 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 bg-celebration-ink px-8 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:opacity-90 disabled:opacity-50"
         >
           {saving ? 'Processando...' : saved ? <><Check size={16} /> Salvo</> : <><Save size={16} /> Salvar Alterações</>}
         </button>
@@ -93,28 +93,28 @@ export function AdminConfig() {
       <form onSubmit={handleSave} className="grid gap-16">
         {/* Identidade */}
         <section className="space-y-8">
-          <div className="flex items-center gap-3 border-b border-editorial-border pb-4">
-            <Globe className="text-editorial-accent" size={16} />
-            <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink">Identidade da Empresa</h3>
+          <div className="flex items-center gap-3 border-b border-celebration-border pb-4">
+            <Globe className="text-celebration-pink" size={16} />
+            <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink">Identidade da Empresa</h3>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Nome da Empresa</label>
+              <label className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-muted">Nome da Empresa</label>
               <input 
                 type="text" 
                 value={formData.nome_empresa}
                 onChange={(e) => handleChange('nome_empresa', e.target.value)}
-                className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-editorial-accent"
+                className="border border-celebration-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-celebration-pink"
                 placeholder="Ex: LM Decor"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Logo (URL)</label>
+              <label className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-muted">Logo (URL)</label>
               <input 
                 type="text" 
                 value={formData.logo_url}
                 onChange={(e) => handleChange('logo_url', e.target.value)}
-                className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-editorial-accent"
+                className="border border-celebration-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-celebration-pink"
                 placeholder="https://..."
               />
             </div>
@@ -123,36 +123,36 @@ export function AdminConfig() {
 
         {/* Contato */}
         <section className="space-y-8">
-          <div className="flex items-center gap-3 border-b border-editorial-border pb-4">
-            <Phone className="text-editorial-accent" size={16} />
-            <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-editorial-ink">Contato e Endereço</h3>
+          <div className="flex items-center gap-3 border-b border-celebration-border pb-4">
+            <Phone className="text-celebration-pink" size={16} />
+            <h3 className="text-[11px] font-bold uppercase tracking-[2px] text-celebration-ink">Contato e Endereço</h3>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
             <div className="flex flex-col gap-2 md:col-span-2">
-              <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Endereço Completo</label>
+              <label className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-muted">Endereço Completo</label>
               <textarea 
                 rows={3}
                 value={formData.endereco_texto}
                 onChange={(e) => handleChange('endereco_texto', e.target.value)}
-                className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-editorial-accent"
+                className="border border-celebration-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-celebration-pink"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">WhatsApp</label>
+              <label className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-muted">WhatsApp</label>
               <input 
                 type="text" 
                 value={formData.whatsapp}
                 onChange={(e) => handleChange('whatsapp', e.target.value)}
-                className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-editorial-accent"
+                className="border border-celebration-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-celebration-pink"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">E-mail</label>
+              <label className="text-[10px] font-bold uppercase tracking-[1px] text-celebration-muted">E-mail</label>
               <input 
                 type="email" 
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                className="border border-editorial-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-editorial-accent"
+                className="border border-celebration-border bg-white px-4 py-3 text-sm outline-none transition-all focus:border-celebration-pink"
               />
             </div>
           </div>
