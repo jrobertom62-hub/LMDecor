@@ -61,8 +61,12 @@ export function HomePage() {
               Curadoria exclusiva de kits e itens para festas que tornam cada celebração um evento memorável e sofisticado.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#catalogo" className="bg-celebration-pink px-12 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:scale-105 shadow-xl shadow-celebration-pink/20">
-                Explorar Catálogo
+              <a 
+                href="#catalogo" 
+                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-celebration-pink px-12 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:scale-105 shadow-xl shadow-celebration-pink/20"
+              >
+                <span className="relative z-10">Explorar Catálogo</span>
+                <div className="absolute inset-0 z-0 bg-gradient-to-r from-celebration-purple/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               </a>
             </div>
           </motion.div>
