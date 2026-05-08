@@ -14,9 +14,9 @@ export function Footer({ config }: FooterProps) {
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="grid gap-16 md:grid-cols-3">
           <div className="space-y-8">
-            <h3 className="font-serif text-2xl italic text-editorial-ink">
-              {config?.nome_empresa || 'LM Decor'}
-            </h3>
+            <Link to="/" className="inline-block">
+              <img src={config?.logo_url || '/logolmdecor.png'} alt={config?.nome_empresa || 'LM Decor'} className="h-12 w-auto object-contain brightness-0 grayscale" />
+            </Link>
             <p className="max-w-xs text-sm leading-relaxed text-editorial-muted">
               Curadoria de decorações para tornar seus eventos verdadeiramente memoráveis.
             </p>

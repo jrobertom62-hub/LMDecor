@@ -11,8 +11,8 @@ export function Navbar({ config }: NavbarProps) {
     <header className="sticky top-0 z-50 border-b border-editorial-border bg-editorial-cream/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:py-6 md:px-8">
         <Link to="/" className="flex items-center gap-3">
-          {config?.logo_url ? (
-            <img src={config.logo_url} alt={config.nome_empresa} className="h-7 w-auto md:h-10 object-contain" />
+          {(config?.logo_url || '/logolmdecor.png') ? (
+            <img src={config?.logo_url || '/logolmdecor.png'} alt={config?.nome_empresa || 'LM Decor'} className="h-10 w-auto md:h-12 object-contain" />
           ) : (
             <span className="font-serif text-xl md:text-2xl italic tracking-tight text-editorial-ink">
               {config?.nome_empresa || 'LM Decor'}
