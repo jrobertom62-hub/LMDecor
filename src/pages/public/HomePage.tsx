@@ -44,24 +44,24 @@ export function HomePage() {
           <div className="absolute left-[20%] -bottom-[20%] h-[50%] w-[50%] rounded-full bg-celebration-gold/10 blur-[80px]" />
         </div>
         
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-4 md:px-8">
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center items-center text-center px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-2xl"
+            className="max-w-4xl"
           >
             <span className="mb-4 inline-block text-[10px] font-bold uppercase tracking-[4px] text-celebration-pink bg-celebration-pink/5 px-4 py-1.5 rounded-full border border-celebration-pink/10">
               LM Decor Celebrações
             </span>
-            <h1 className="mb-6 font-serif text-4xl leading-tight text-celebration-ink md:text-6xl lg:text-7xl italic">
+            <h1 className="mb-6 font-serif text-5xl leading-tight text-celebration-ink md:text-7xl lg:text-8xl italic">
               Transformamos sonhos em <span className="text-celebration-pink underline decoration-celebration-pink/20 underline-offset-8">cenários mágicos</span>.
             </h1>
-            <p className="mb-10 text-lg text-celebration-muted font-light leading-relaxed max-w-lg">
+            <p className="mb-10 text-lg md:text-xl text-celebration-muted font-light leading-relaxed max-w-2xl mx-auto">
               Curadoria exclusiva de kits e itens para festas que tornam cada celebração um evento memorável e sofisticado.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <a href="#catalogo" className="bg-celebration-pink px-10 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:scale-105 shadow-xl shadow-celebration-pink/20">
+            <div className="flex flex-wrap gap-4 justify-center">
+              <a href="#catalogo" className="bg-celebration-pink px-12 py-4 text-[11px] font-bold uppercase tracking-[2px] text-white transition-all hover:scale-105 shadow-xl shadow-celebration-pink/20">
                 Explorar Catálogo
               </a>
             </div>
