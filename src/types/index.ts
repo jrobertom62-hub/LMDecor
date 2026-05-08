@@ -14,6 +14,7 @@ export interface KitItem {
   imagens: string[];
   capa_url: string;
   fotos?: string[];
+  videos?: string[];
   url_publica: string;
   destaque: boolean;
   publicado: boolean;

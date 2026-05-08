@@ -54,6 +54,7 @@ export function AdminItems() {
     itens_inclusos: '',
     capa_url: '',
     fotos: [],
+    videos: [],
     publicado: true,
     destaque: false,
   });
@@ -157,6 +158,46 @@ export function AdminItems() {
     }
   };
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement> | FileList) => {
+    const files = e instanceof FileList ? e : (e as React.ChangeEvent<HTMLInputElement>).target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const fileArray = Array.from(files).filter(f => f.type.startsWith('video/'));
+      if (fileArray.length === 0) {
+        alert('Por favor, selecione apenas arquivos de vídeo.');
+        return;
+      }
+      
+      const newUrls = await Promise.all(
+        fileArray.map(file => uploadToStorage(file, 'products/videos'))
+      );
+
+      setFormData(prev => ({ 
+        ...prev, 
+        videos: [...(prev.videos || []), ...newUrls] 
+      }));
+    } catch (error: any) {
+      console.error('Video upload error:', error);
+      alert('Erro ao subir vídeos: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeVideo = async (index: number) => {
+    const urlToRemove = formData.videos?.[index];
+    if (urlToRemove) {
+      await deleteFromStorage(urlToRemove);
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      videos: (prev.videos || []).filter((_, i) => i !== index)
+    }));
+  };
+
   const removeGalleryImage = async (index: number) => {
     const urlToRemove = formData.fotos?.[index];
     if (urlToRemove) {
@@ -174,7 +215,8 @@ export function AdminItems() {
       setEditingItem(item);
       setFormData({
         ...item,
-        fotos: item.fotos || []
+        fotos: item.fotos || [],
+        videos: item.videos || []
       });
     } else {
       setEditingItem(null);
@@ -190,6 +232,7 @@ export function AdminItems() {
         itens_inclusos: '',
         capa_url: '',
         fotos: [],
+        videos: [],
         publicado: true,
         destaque: false,
       });
@@ -639,13 +682,32 @@ export function AdminItems() {
                                   onDragStart={(e) => {
                                     e.dataTransfer.setData('galleryIndex', idx.toString());
                                   }}
+                                  onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const fromIdxStr = e.dataTransfer.getData('galleryIndex');
+                                    if (fromIdxStr !== '') {
+                                      const fromIdx = parseInt(fromIdxStr);
+                                      if (fromIdx === idx) return;
+                                      
+                                      const newFotos = [...(formData.fotos || [])];
+                                      const [movedItem] = newFotos.splice(fromIdx, 1);
+                                      newFotos.splice(idx, 0, movedItem);
+                                      
+                                      setFormData(prev => ({ ...prev, fotos: newFotos }));
+                                    }
+                                  }}
                                   className="relative aspect-square border border-editorial-border group cursor-move hover:ring-2 hover:ring-editorial-accent transition-all"
                                 >
                                   <img src={url} className="h-full w-full object-cover" alt={`Gallery ${idx}`} />
                                   <button 
                                     type="button"
                                     onClick={() => removeGalleryImage(idx)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-lg"
                                   >
                                     <X size={10} />
                                   </button>
@@ -657,6 +719,78 @@ export function AdminItems() {
                                   multiple
                                   accept="image/*"
                                   onChange={handleGalleryUpload}
+                                  className="absolute inset-0 cursor-pointer opacity-0"
+                                  disabled={uploading}
+                                />
+                                <Plus size={20} className="text-editorial-muted" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Galeria de Vídeos */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[1px] text-editorial-muted">Galeria de Vídeos (MP4)</label>
+                            <div 
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  handleVideoUpload(e.dataTransfer.files);
+                                }
+                              }}
+                              className="grid grid-cols-3 gap-2 p-2 border-2 border-transparent hover:border-editorial-accent/30 rounded-sm transition-all"
+                            >
+                              {formData.videos?.map((url, idx) => (
+                                <div 
+                                  key={idx} 
+                                  draggable
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData('videoIndex', idx.toString());
+                                  }}
+                                  onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const fromIdxStr = e.dataTransfer.getData('videoIndex');
+                                    if (fromIdxStr !== '') {
+                                      const fromIdx = parseInt(fromIdxStr);
+                                      if (fromIdx === idx) return;
+                                      
+                                      const newVideos = [...(formData.videos || [])];
+                                      const [movedItem] = newVideos.splice(fromIdx, 1);
+                                      newVideos.splice(idx, 0, movedItem);
+                                      
+                                      setFormData(prev => ({ ...prev, videos: newVideos }));
+                                    }
+                                  }}
+                                  className="relative aspect-square border border-editorial-border group bg-black flex items-center justify-center overflow-hidden cursor-move"
+                                >
+                                  <video src={url} className="h-full w-full object-cover opacity-60" />
+                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <Eye className="text-white h-6 w-6" />
+                                  </div>
+                                  <button 
+                                    type="button"
+                                    onClick={() => removeVideo(idx)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-lg"
+                                  >
+                                    <X size={10} />
+                                  </button>
+                                </div>
+                              ))}
+                              <div className="relative aspect-square border-2 border-dashed border-editorial-border flex items-center justify-center hover:border-editorial-accent transition-colors">
+                                <input 
+                                  type="file" 
+                                  multiple
+                                  accept="video/*"
+                                  onChange={handleVideoUpload}
                                   className="absolute inset-0 cursor-pointer opacity-0"
                                   disabled={uploading}
                                 />

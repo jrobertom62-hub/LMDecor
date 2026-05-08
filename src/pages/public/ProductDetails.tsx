@@ -13,7 +13,7 @@ export function ProductDetails() {
   const [product, setProduct] = useState<KitItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeMedia, setActiveMedia] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -29,7 +29,7 @@ export function ProductDetails() {
         
         if (data && data.publicado) {
           setProduct(data as KitItem);
-          setActiveImage(data.capa_url);
+          setActiveMedia(data.capa_url);
         } else {
           setError(true);
         }
@@ -72,7 +72,16 @@ export function ProductDetails() {
     );
   }
 
-  const allImages = [product.capa_url, ...(product.fotos || [])].filter(Boolean);
+  const allMedia = [
+    product.capa_url, 
+    ...(product.fotos || []),
+    ...(product.videos || [])
+  ].filter(Boolean);
+
+  const isVideo = (url: string) => {
+    return url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes('/videos/');
+  };
+
   const whatsappMessage = `Olá! Tenho interesse no kit/item código ${product.codigo_produto}. Pode me passar mais informações? (Item: ${product.titulo})`;
   const whatsappUrl = config?.whatsapp 
     ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
@@ -94,27 +103,49 @@ export function ProductDetails() {
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6"
         >
-          <div className="aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border">
-            <img 
-              src={activeImage || 'https://placehold.co/800x1000?text=Sem+Foto'} 
-              alt={product.titulo}
-              className="h-full w-full object-cover transition-all duration-500"
-              referrerPolicy="no-referrer"
-            />
+          <div className="aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border relative">
+            {activeMedia && isVideo(activeMedia) ? (
+              <video 
+                src={activeMedia} 
+                controls 
+                className="h-full w-full object-cover"
+                autoPlay
+                muted
+                loop
+              />
+            ) : (
+              <img 
+                src={activeMedia || 'https://placehold.co/800x1000?text=Sem+Foto'} 
+                alt={product.titulo}
+                className="h-full w-full object-cover transition-all duration-500"
+                referrerPolicy="no-referrer"
+              />
+            )}
           </div>
           
-          {allImages.length > 1 && (
+          {allMedia.length > 1 && (
             <div className="grid grid-cols-5 gap-4">
-              {allImages.map((img, idx) => (
+              {allMedia.map((media, idx) => (
                 <button 
                   key={idx}
-                  onClick={() => setActiveImage(img)}
+                  onClick={() => setActiveMedia(media)}
                   className={cn(
-                    "aspect-square border transition-all overflow-hidden",
-                    activeImage === img ? "border-editorial-ink scale-95" : "border-editorial-border hover:border-editorial-accent"
+                    "aspect-square border transition-all overflow-hidden relative",
+                    activeMedia === media ? "border-editorial-ink scale-95" : "border-editorial-border hover:border-editorial-accent"
                   )}
                 >
-                  <img src={img} className="h-full w-full object-cover" alt={`Thumb ${idx}`} />
+                  {isVideo(media) ? (
+                    <div className="relative h-full w-full bg-black flex items-center justify-center">
+                      <video src={media} className="h-full w-full object-cover opacity-50" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="rounded-full bg-white/20 p-1 backdrop-blur-sm">
+                          <Eye className="text-white h-4 w-4" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img src={media} className="h-full w-full object-cover" alt={`Thumb ${idx}`} />
+                  )}
                 </button>
               ))}
             </div>
