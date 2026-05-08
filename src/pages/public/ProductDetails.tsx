@@ -3,7 +3,7 @@ import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom
 import { supabase } from '../../lib/supabase';
 import { KitItem, SiteConfig } from '../../types';
 import { motion } from 'motion/react';
-import { MessageCircle, ChevronLeft, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MessageCircle, ChevronLeft, ChevronRight, Package, Ruler, Palette, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatCurrency, cn } from '../../lib/utils';
 
 export function ProductDetails() {
@@ -14,6 +14,7 @@ export function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeMedia, setActiveMedia] = useState<string | null>(null);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -30,6 +31,7 @@ export function ProductDetails() {
         if (data && data.publicado) {
           setProduct(data as KitItem);
           setActiveMedia(data.capa_url);
+          setCurrentMediaIndex(0);
         } else {
           setError(true);
         }
@@ -82,6 +84,18 @@ export function ProductDetails() {
     return url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes('/videos/');
   };
 
+  const nextMedia = () => {
+    const nextIdx = (currentMediaIndex + 1) % allMedia.length;
+    setCurrentMediaIndex(nextIdx);
+    setActiveMedia(allMedia[nextIdx]);
+  };
+
+  const prevMedia = () => {
+    const prevIdx = (currentMediaIndex - 1 + allMedia.length) % allMedia.length;
+    setCurrentMediaIndex(prevIdx);
+    setActiveMedia(allMedia[prevIdx]);
+  };
+
   const whatsappMessage = `Olá! Tenho interesse no kit/item código ${product.codigo_produto}. Pode me passar mais informações? (Item: ${product.titulo})`;
   const whatsappUrl = config?.whatsapp 
     ? `https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
@@ -104,7 +118,7 @@ export function ProductDetails() {
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6"
         >
-          <div className="aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border relative">
+          <div className="group relative aspect-[4/5] overflow-hidden bg-neutral-100 border border-editorial-border rounded-xl">
             {activeMedia && isVideo(activeMedia) ? (
               <video 
                 src={activeMedia} 
@@ -122,6 +136,24 @@ export function ProductDetails() {
                 referrerPolicy="no-referrer"
               />
             )}
+
+            {/* Navigation Arrows */}
+            {allMedia.length > 1 && (
+              <>
+                <button 
+                  onClick={(e) => { e.preventDefault(); prevMedia(); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-editorial-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={(e) => { e.preventDefault(); nextMedia(); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md p-3 rounded-full text-editorial-ink shadow-xl transition-all opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 hover:bg-celebration-pink hover:text-white"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
           </div>
           
           {allMedia.length > 1 && (
@@ -129,10 +161,13 @@ export function ProductDetails() {
               {allMedia.map((media, idx) => (
                 <button 
                   key={idx}
-                  onClick={() => setActiveMedia(media)}
+                  onClick={() => {
+                    setActiveMedia(media);
+                    setCurrentMediaIndex(idx);
+                  }}
                   className={cn(
-                    "aspect-square border transition-all overflow-hidden relative",
-                    activeMedia === media ? "border-editorial-ink scale-95" : "border-editorial-border hover:border-editorial-accent"
+                    "aspect-square border transition-all overflow-hidden relative rounded-lg",
+                    activeMedia === media ? "border-celebration-pink scale-95 ring-2 ring-celebration-pink/20" : "border-editorial-border hover:border-editorial-accent"
                   )}
                 >
                   {isVideo(media) ? (
@@ -259,5 +294,6 @@ export function ProductDetails() {
         </motion.div>
       </div>
     </div>
-  );
+  </div>
+);
 }
